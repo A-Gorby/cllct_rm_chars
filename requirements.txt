@@ -1,0 +1,6 @@
+xlrd
+pyxlsb
+openpyxl
+py7zr
+xlsxwriter
+python-docx
