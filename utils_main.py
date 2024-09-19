@@ -598,11 +598,11 @@ def create_kpgz_data(
                     # print(spgz_df[cols].unique()[:5])
         else:
             print(f"Колонка/колонки '{cols}' отсутствуют в данных")
-    if debug: 
+    if debug:
         print("kpgz_head:")
         pprint(kpgz_head)
         print(80*'*')
-    
+
     chars_of_chars_dict = {}
     for col in char_of_char_cols_lst:
         name_char_of_char_col = col
@@ -634,7 +634,7 @@ def create_kpgz_data(
                     value_def_in_spgz = value_def_in_spgz, #'Определено в СПГЗ',
                     debug=False)
         else:
-            logger.error(f"Колонка '{name_char_of_char_col}' отсутствует в данных]")
+            logger.error(f"Колонка '{name_char_of_char_col}' отсутствует в данных")
             missing_columns.append(name_char_of_char_col)
             for key, value_dict in chars_of_chars_dict.items():
                 chars_of_chars_dict[key][name_char_of_char_col] = default_value_lst.get(name_char_of_char_col)
@@ -878,12 +878,12 @@ def write_head_kpgz_sheet(
     ws_target = wb.create_sheet('СПГЗ')
     # ws_target = wb_source.copy_worksheet(ws_source) # Не работает
     # ws_target = ws_source.rows # Не работает
-    
+
     # wb.save(os.path.join(data_processed_dir, fn_save))
 
     wb_source = load_workbook(filename=os.path.join(data_source_dir, fn_source)) #, read_only=False)
     ws_source = wb_source['СПГЗ']
-     
+
     for i in range(1, ws_source.max_column + 1):
         ws_target.column_dimensions[get_column_letter(i)].width = ws_source.column_dimensions[get_column_letter(i)].width
     for row in ws_source.iter_rows():
@@ -901,7 +901,7 @@ def write_head_kpgz_sheet(
     wb.save(os.path.join(data_processed_dir, fn_save))
 
     logger.info(f"Файл '{fn_save}' - созранен в папке '{data_processed_dir}'")
-    
+
     return
 
 
@@ -910,22 +910,25 @@ def main(
     sh_n_source,
     data_source_dir = '/content/data/source',
     data_processed_dir = '/content/data/processed',
+    data_tmp_dir = '/content/data/tmp',
     source_code_dir = '/content/cllct_rm_chars',
     debug=False,
 ):
 
     okpd2_df = read_okpd_dict()
 
-    save_dir=os.path.join(data_source_dir, '!')
-    if not os.path.exists(save_dir): os.mkdir(save_dir)
+    # save_dir=os.path.join(data_source_dir, '!')
+    # if not os.path.exists(save_dir): os.mkdir(save_dir)
+    if not os.path.exists(data_tmp_dir): os.mkdir(data_tmp_dir)
     
-    split_merged_cells_in_dir(data_source_dir, save_dir , debug=False)
 
-    df_rm_source = read_data(save_dir, fn_source, sh_n_source, )
+    split_merged_cells_in_dir(data_source_dir, data_tmp_dir, debug=False)
+
+    df_rm_source = read_data(data_tmp_dir, fn_source, sh_n_source, )
 
     spgz_code_name, spgz_characteristics_content_loc_df = extract_spgz_df_lst(
-      fn=os.path.join(save_dir, fn_source),
-      sh_n_spgz=sh_n_source, 
+      fn=os.path.join(data_tmp_dir, fn_source),
+      sh_n_spgz=sh_n_source,
       groupby_col='№п/п',
       unique_test_cols=['Наименование СПГЗ', 'Единица измерения', 'ОКПД 2', 'Позиция КТРУ'],
       significant_cols = [
