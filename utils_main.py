@@ -136,7 +136,7 @@ from openpyxl import utils
 
 def split_merged_cells(fn_path, sh_n_spgz, save_dir, debug=False):
     if not os.path.exists(fn_path):
-        logger.error(f"Файл '{fn_path.split(os.path.sep)[-1]}' не найден'{save_dir}'")
+        logger.error(f"Файл '{fn_path.split(os.path.sep)[-1]}' не найден")
         logger.error(f"Работа программы завершена")
         sys.exit(2)
     wb = load_workbook(fn_path, read_only=False)
