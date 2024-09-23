@@ -105,34 +105,70 @@ from openpyxl import load_workbook
 from openpyxl.worksheet import merge
 from openpyxl import utils
 
+# def split_merged_cells(fn_path, sh_n_spgz, save_dir, debug=False):
+#     wb = load_workbook(fn_path, read_only=False)
+#     min_row = 3
+#     # try:
+#     ws = wb[sh_n_spgz]
+
+#     if debug:
+#         print(ws.merged_cells.ranges)
+#     for merged_cells_range in  sorted(list(ws.merged_cells.ranges)):
+#         if merged_cells_range.min_row <= min_row: continue
+#         value = ws.cell(row=merged_cells_range.min_row, column=merged_cells_range.min_col).value
+#         if debug:
+#             print(merged_cells_range, value)
+#         # ws.unmerge_cells(range_string = merged_cells_range)
+#         ws.unmerge_cells(start_row=merged_cells_range.min_row, start_column=merged_cells_range.min_col, end_row=merged_cells_range.max_row, end_column=merged_cells_range.max_col)
+
+#         for i_row in range(merged_cells_range.min_row, merged_cells_range.max_row + 1):
+#             for i_col in range(merged_cells_range.min_col, merged_cells_range.max_col + 1):
+#                 # ws.cell(row=i_row, column=i_col) = value
+#                 # print(i_col, utils.cell.get_column_letter(i_col), i_row)
+#                 # print(f"{utils.cell.get_column_letter(i_col)}{i_row}") #, ws[f"{l_col}{i_row}"])
+#                 ws[f"{utils.cell.get_column_letter(i_col)}{i_row}"] = value
+#     # except Exception as err:
+#     #     print(err)
+
+#     fn_proc_save = os.path.join(save_dir, fn_path.split(os.path.sep)[-1])
+#     wb.save(fn_proc_save)
+#     return fn_proc_save
+
 def split_merged_cells(fn_path, sh_n_spgz, save_dir, debug=False):
+    if not os.path.exists(fn_path):
+        logger.error(f"Файл '{fn_path.split(os.path.sep)[-1]}' не найден'{save_dir}'")
+        logger.error(f"Работа программы завершена")
+        sys.exit(2)
     wb = load_workbook(fn_path, read_only=False)
     min_row = 3
-    # try:
-    ws = wb[sh_n_spgz]
+    try:
+        ws = wb[sh_n_spgz]
 
-    if debug:
-        print(ws.merged_cells.ranges)
-    for merged_cells_range in  sorted(list(ws.merged_cells.ranges)):
-        if merged_cells_range.min_row <= min_row: continue
-        value = ws.cell(row=merged_cells_range.min_row, column=merged_cells_range.min_col).value
         if debug:
-            print(merged_cells_range, value)
-        # ws.unmerge_cells(range_string = merged_cells_range)
-        ws.unmerge_cells(start_row=merged_cells_range.min_row, start_column=merged_cells_range.min_col, end_row=merged_cells_range.max_row, end_column=merged_cells_range.max_col)
+            print(ws.merged_cells.ranges)
+        for merged_cells_range in  sorted(list(ws.merged_cells.ranges)):
+            if merged_cells_range.min_row <= min_row: continue
+            value = ws.cell(row=merged_cells_range.min_row, column=merged_cells_range.min_col).value
+            if debug:
+                print(merged_cells_range, value)
+            # ws.unmerge_cells(range_string = merged_cells_range)
+            ws.unmerge_cells(start_row=merged_cells_range.min_row, start_column=merged_cells_range.min_col, end_row=merged_cells_range.max_row, end_column=merged_cells_range.max_col)
 
-        for i_row in range(merged_cells_range.min_row, merged_cells_range.max_row + 1):
-            for i_col in range(merged_cells_range.min_col, merged_cells_range.max_col + 1):
-                # ws.cell(row=i_row, column=i_col) = value
-                # print(i_col, utils.cell.get_column_letter(i_col), i_row)
-                # print(f"{utils.cell.get_column_letter(i_col)}{i_row}") #, ws[f"{l_col}{i_row}"])
-                ws[f"{utils.cell.get_column_letter(i_col)}{i_row}"] = value
-    # except Exception as err:
-    #     print(err)
+            for i_row in range(merged_cells_range.min_row, merged_cells_range.max_row + 1):
+                for i_col in range(merged_cells_range.min_col, merged_cells_range.max_col + 1):
+                    # ws.cell(row=i_row, column=i_col) = value
+                    # print(i_col, utils.cell.get_column_letter(i_col), i_row)
+                    # print(f"{utils.cell.get_column_letter(i_col)}{i_row}") #, ws[f"{l_col}{i_row}"])
+                    ws[f"{utils.cell.get_column_letter(i_col)}{i_row}"] = value
+    except Exception as err:
+        logger.error(str(err))
+        logger.error(f"Работа программы завершена")
+        sys.exit(2)
 
     fn_proc_save = os.path.join(save_dir, fn_path.split(os.path.sep)[-1])
     wb.save(fn_proc_save)
     return fn_proc_save
+# fn_proc_save = split_merged_cells(fn_path, sh_n_spgz, save_dir=save_dir, debug=False)
 
 def split_merged_cells_in_dir(data_source_dir, save_dir, debug=False):
     fn_lst = glob.glob(os.path.join(data_source_dir,'*.xlsx'))
@@ -920,9 +956,11 @@ def main(
     # save_dir=os.path.join(data_source_dir, '!')
     # if not os.path.exists(save_dir): os.mkdir(save_dir)
     if not os.path.exists(data_tmp_dir): os.mkdir(data_tmp_dir)
-    
 
-    split_merged_cells_in_dir(data_source_dir, data_tmp_dir, debug=False)
+
+    # split_merged_cells_in_dir(data_source_dir, data_tmp_dir, debug=False)
+    fn_path = os.path.join(data_source_dir,fn_source)
+    fn_proc_save = split_merged_cells(fn_path, sh_n_spgz, save_dir=save_dir, debug=False)
 
     df_rm_source = read_data(data_tmp_dir, fn_source, sh_n_source, )
 
