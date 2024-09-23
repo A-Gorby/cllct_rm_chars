@@ -837,7 +837,7 @@ def write_head_kpgz_sheet(
 
     ktru_lst, ktru_is_lst = get_total_ktru_code_name(kpgz_head)
     ws['B4'] = ktru_lst
-    if ktru_is_lst:
+    if ktru_is_lst and (type(ktru_lst)!=str):
         ws['B4'].fill =  PatternFill('solid', fgColor='00C0C0C0')
 
     ws['A5'] = 'Уровень детализации адреса'
