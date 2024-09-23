@@ -960,7 +960,7 @@ def main(
 
     # split_merged_cells_in_dir(data_source_dir, data_tmp_dir, debug=False)
     fn_path = os.path.join(data_source_dir,fn_source)
-    fn_proc_save = split_merged_cells(fn_path, sh_n_spgz, save_dir=save_dir, debug=False)
+    fn_proc_save = split_merged_cells(fn_path, sh_n_spgz=sh_n_source, save_dir=save_dir, debug=False)
 
     df_rm_source = read_data(data_tmp_dir, fn_source, sh_n_source, )
 
