@@ -957,9 +957,12 @@ def main(
     # if not os.path.exists(save_dir): os.mkdir(save_dir)
     if not os.path.exists(data_tmp_dir): os.mkdir(data_tmp_dir)
 
-
+    if fn_source is None or sh_n_source is None:
+        logger.error("Необходимо выбрать файл и лист Excel для обработки")
+        logger.error("Работа программы прекращена")
+        sys.exit(2)
     # split_merged_cells_in_dir(data_source_dir, data_tmp_dir, debug=False)
-    fn_path = os.path.join(data_source_dir,fn_source)
+    fn_path = os.path.join(data_source_dir, fn_source)
     fn_proc_save = split_merged_cells(fn_path, sh_n_spgz=sh_n_source, save_dir=data_tmp_dir, debug=False)
 
     df_rm_source = read_data(data_tmp_dir, fn_source, sh_n_source, )
