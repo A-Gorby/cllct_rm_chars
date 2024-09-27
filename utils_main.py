@@ -69,7 +69,7 @@ class Logger():
         # create formatter
         self.strfmt = strfmt # '[%(asctime)s] [%(levelname)s] > %(message)s'
         self.datefmt = datefmt # '%H:%M:%S'
-        # СЃРѕР·РґР°РµРј С„РѕСЂРјР°С‚С‚РµСЂ
+        # РЎРѓР С•Р В·Р Т‘Р В°Р ВµР С РЎвЂћР С•РЎР‚Р СР В°РЎвЂљРЎвЂљР ВµРЎР‚
         self.formatter = logging.Formatter(fmt=strfmt, datefmt=datefmt)
         self.formatter.converter = lambda *args: datetime.datetime.now(self.offset).timetuple()
         self.ch.setFormatter(self.formatter)
@@ -90,18 +90,15 @@ from utils_io import insert_pd_col_after_col, save_df_lst_to_excel_xlsxwriter, s
 
 def read_okpd_dict(
     supp_dict_dir = '/content/cllct_rm_chars/data',
-    fn = '20240624_ОКПД2_2024_09_13_1519.xlsx',
-    sh_n = 'ОКПД2',
+    fn = '20240624_РћРљРџР”2_2024_09_13_1519.xlsx',
+    sh_n = 'РћРљРџР”2',
 ):
     try:
         okpd2_df = pd.read_excel(os.path.join(supp_dict_dir, fn), sheet_name=sh_n)
-        logger.info(f"Справочник ОКПД2: (строк, колонок): {str(okpd2_df.shape)}")
-        # display(okpd2_df.head(2))
+        logger.info(f"РЎРїСЂР°РІРѕС‡РЅРёРє РћРљРџР”2: (СЃС‚СЂРѕРє, РєРѕР»РѕРЅРѕРє): {str(okpd2_df.shape)}")
+        display(okpd2_df.head(2))
     except Exception as err:
         logger.error(str(err))
-        logger.error("Справочник ОКПД2 не найден")
-        logger.error("Работа программы прекращена")
-        sys.exit(2)
     return okpd2_df
 
 from openpyxl import load_workbook
@@ -139,8 +136,8 @@ from openpyxl import utils
 
 def split_merged_cells(fn_path, sh_n_spgz, save_dir, debug=False):
     if not os.path.exists(fn_path):
-        logger.error(f"Файл '{fn_path.split(os.path.sep)[-1]}' не найден")
-        logger.error(f"Работа программы завершена")
+        logger.error(f"Р¤Р°Р№Р» '{fn_path.split(os.path.sep)[-1]}' РЅРµ РЅР°Р№РґРµРЅ")
+        logger.error(f"Р Р°Р±РѕС‚Р° РїСЂРѕРіСЂР°РјРјС‹ Р·Р°РІРµСЂС€РµРЅР°")
         sys.exit(2)
     wb = load_workbook(fn_path, read_only=False)
     min_row = 3
@@ -165,7 +162,7 @@ def split_merged_cells(fn_path, sh_n_spgz, save_dir, debug=False):
                     ws[f"{utils.cell.get_column_letter(i_col)}{i_row}"] = value
     except Exception as err:
         logger.error(str(err))
-        logger.error(f"Работа программы завершена")
+        logger.error(f"Р Р°Р±РѕС‚Р° РїСЂРѕРіСЂР°РјРјС‹ Р·Р°РІРµСЂС€РµРЅР°")
         sys.exit(2)
 
     fn_proc_save = os.path.join(save_dir, fn_path.split(os.path.sep)[-1])
@@ -176,12 +173,12 @@ def split_merged_cells(fn_path, sh_n_spgz, save_dir, debug=False):
 def split_merged_cells_in_dir(data_source_dir, save_dir, debug=False):
     fn_lst = glob.glob(os.path.join(data_source_dir,'*.xlsx'))
     print(fn_lst)
-    # sh_n_kpgz = 'КПГЗ'
-    sh_n_spgz = 'СПГЗ'
+    # sh_n_kpgz = 'РљРџР“Р—'
+    sh_n_spgz = 'РЎРџР“Р—'
     for fn_path in fn_lst:
         print(fn_path)
         fn_proc_save = split_merged_cells(fn_path, sh_n_spgz, save_dir=save_dir, debug=False)
-        logger.info(f"Файл '{fn_proc_save.split(os.path.sep)[-1]}' сохранен в папке '{save_dir}'")
+        logger.info(f"Р¤Р°Р№Р» '{fn_proc_save.split(os.path.sep)[-1]}' СЃРѕС…СЂР°РЅРµРЅ РІ РїР°РїРєРµ '{save_dir}'")
 
 def read_data(
     data_source_dir,
@@ -192,11 +189,11 @@ def read_data(
 
 
     if fn_source is None or sh_n_source is None:
-        logger.info("Не опеределен входной файл/лист Excel")
-        logger.info(f"Файл Excel: '{fn_source}'")
-        logger.info(f"Лист Excel: '{sh_n_source}'")
+        logger.info("РќРµ РѕРїРµСЂРµРґРµР»РµРЅ РІС…РѕРґРЅРѕР№ С„Р°Р№Р»/Р»РёСЃС‚ Excel")
+        logger.info(f"Р¤Р°Р№Р» Excel: '{fn_source}'")
+        logger.info(f"Р›РёСЃС‚ Excel: '{sh_n_source}'")
     if not os.path.exists(os.path.join(data_source_dir, fn_source)):
-        logger.error(f"Файл Excel: '{fn_source}' не найден")
+        logger.error(f"Р¤Р°Р№Р» Excel: '{fn_source}' РЅРµ РЅР°Р№РґРµРЅ")
 
     try:
         df_rm_source_t = pd.read_excel(os.path.join(data_source_dir, fn_source), sheet_name=sh_n_source, nrows=5, header=1)
@@ -204,10 +201,10 @@ def read_data(
         converters = dict(zip(source_cols, len(source_cols)*[str]))
         df_rm_source = pd.read_excel(os.path.join(data_source_dir, fn_source), sheet_name=sh_n_source, header=1,
                                  converters=converters)
-        logger.info(f"Файл Excel для обработки: '{fn_source}':\n(строк, колонок): {str(df_rm_source.shape)}")
+        logger.info(f"Р¤Р°Р№Р» Excel РґР»СЏ РѕР±СЂР°Р±РѕС‚РєРё: '{fn_source}':\n(СЃС‚СЂРѕРє, РєРѕР»РѕРЅРѕРє): {str(df_rm_source.shape)}")
     except Exception as err:
        logger.error(str(err))
-       logger.error("Работа программы прекращена")
+       logger.error("Р Р°Р±РѕС‚Р° РїСЂРѕРіСЂР°РјРјС‹ РїСЂРµРєСЂР°С‰РµРЅР°")
        sys.exit()
 
     return df_rm_source
@@ -236,7 +233,7 @@ def extract_kpgz_df_lst(fn, sh_n_kpgz, debug=False):
     # print(kpgz_header_name_loc_df.values[0,0])
     kpgz_code_name = None
     try:
-        kpgz_code_name_01 = re.sub( 'Позиция КПГЗ ', '', kpgz_header_name_loc_df.values[0,0]).strip()
+        kpgz_code_name_01 = re.sub( 'РџРѕР·РёС†РёСЏ РљРџР“Р— ', '', kpgz_header_name_loc_df.values[0,0]).strip()
     except Exception as err:
         print("ERROR: extract_kpgz_df_lst:")
         print(err)
@@ -244,52 +241,52 @@ def extract_kpgz_df_lst(fn, sh_n_kpgz, debug=False):
 
     kpgz_header_content_loc_df = pd.read_excel(fn, sheet_name=sh_n_kpgz, header=None, skiprows=1, nrows=7 )
 
-    kpgz_header_content_loc_df.rename(columns = {0: 'Показатель', 1: 'Значение'}, inplace=True)
+    kpgz_header_content_loc_df.rename(columns = {0: 'РџРѕРєР°Р·Р°С‚РµР»СЊ', 1: 'Р—РЅР°С‡РµРЅРёРµ'}, inplace=True)
 
-    kpgz_header_content_loc_df['КГПЗ Код Наименование'] = kpgz_code_name
-    kpgz_header_content_loc_df = kpgz_header_content_loc_df[['КГПЗ Код Наименование'] + list(kpgz_header_content_loc_df.columns[:-1])]
+    kpgz_header_content_loc_df['РљР“РџР— РљРѕРґ РќР°РёРјРµРЅРѕРІР°РЅРёРµ'] = kpgz_code_name
+    kpgz_header_content_loc_df = kpgz_header_content_loc_df[['РљР“РџР— РљРѕРґ РќР°РёРјРµРЅРѕРІР°РЅРёРµ'] + list(kpgz_header_content_loc_df.columns[:-1])]
     # display(kpgz_header_content_loc_df)
 
     kpgz_characteristics_name_loc_df = pd.read_excel(fn, sheet_name=sh_n_kpgz, header=None, skiprows=9, nrows=1)
         # display(kpgz_characteristics_name_loc_df)
     # print(kpgz_characteristics_name_loc_df.values[0,0])
     try:
-        kpgz_code_name_02 = re.sub( 'Справочник характеристик и их значений позиции КПГЗ ', '', kpgz_characteristics_name_loc_df.values[0,0]).strip()
+        kpgz_code_name_02 = re.sub( 'РЎРїСЂР°РІРѕС‡РЅРёРє С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє Рё РёС… Р·РЅР°С‡РµРЅРёР№ РїРѕР·РёС†РёРё РљРџР“Р— ', '', kpgz_characteristics_name_loc_df.values[0,0]).strip()
     except Exception as err:
         print(err)
     if kpgz_code_name_01 != kpgz_code_name_02:
-        print(f"Наименование КПГЗ для заголовка '{kpgz_code_name_01}' не совпадает с наименованием для характеристик '{kpgz_code_name_02}'")
+        print(f"РќР°РёРјРµРЅРѕРІР°РЅРёРµ РљРџР“Р— РґР»СЏ Р·Р°РіРѕР»РѕРІРєР° '{kpgz_code_name_01}' РЅРµ СЃРѕРІРїР°РґР°РµС‚ СЃ РЅР°РёРјРµРЅРѕРІР°РЅРёРµРј РґР»СЏ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє '{kpgz_code_name_02}'")
 
 
     kpgz_characteristics_content_loc_df = pd.read_excel(fn, sheet_name=sh_n_kpgz, skiprows=10) #, header=11)
     kpgz_characteristics_content_loc_df = kpgz_characteristics_content_loc_df[1:]
-    kpgz_characteristics_content_loc_df['КГПЗ Код Наименование'] = kpgz_code_name
-    # kpgz_characteristics_content_loc_df.columns = ['КГПЗ Код Наименование'] + list(kpgz_characteristics_content_loc_df.columns[:-1])
-    kpgz_characteristics_content_loc_df = kpgz_characteristics_content_loc_df[['КГПЗ Код Наименование'] + list(kpgz_characteristics_content_loc_df.columns[:-1])]
+    kpgz_characteristics_content_loc_df['РљР“РџР— РљРѕРґ РќР°РёРјРµРЅРѕРІР°РЅРёРµ'] = kpgz_code_name
+    # kpgz_characteristics_content_loc_df.columns = ['РљР“РџР— РљРѕРґ РќР°РёРјРµРЅРѕРІР°РЅРёРµ'] + list(kpgz_characteristics_content_loc_df.columns[:-1])
+    kpgz_characteristics_content_loc_df = kpgz_characteristics_content_loc_df[['РљР“РџР— РљРѕРґ РќР°РёРјРµРЅРѕРІР°РЅРёРµ'] + list(kpgz_characteristics_content_loc_df.columns[:-1])]
     # display(kpgz_characteristics_content_loc_df.head())
 
     try:
-        kpgz_characteristics_content_loc_df['Наименование характеристики'] = kpgz_characteristics_content_loc_df['Наименование характеристики'].apply(trim_right_dot_compress_spaces)
+        kpgz_characteristics_content_loc_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё'] = kpgz_characteristics_content_loc_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё'].apply(trim_right_dot_compress_spaces)
     except Exception as err:
         print(err)
 
     return kpgz_code_name, kpgz_header_content_loc_df, kpgz_characteristics_content_loc_df
 
-def extract_spgz_df_lst(fn, sh_n_spgz, groupby_col='№п/п',
-                        unique_test_cols=['Наименование СПГЗ', 'Единица измерения', 'ОКПД 2', 'Позиция КТРУ'],
-                        significant_cols = ['Наименование характеристики', 'Единица измерения характеристики', 'Значение характеристики', 'Тип характеристики', 'Тип выбора значений характеристики заказчиком'],
+def extract_spgz_df_lst(fn, sh_n_spgz, groupby_col='в„–Рї/Рї',
+                        unique_test_cols=['РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ', 'РћРљРџР” 2', 'РџРѕР·РёС†РёСЏ РљРўР РЈ'],
+                        significant_cols = ['РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'Р—РЅР°С‡РµРЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'РўРёРї С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'РўРёРї РІС‹Р±РѕСЂР° Р·РЅР°С‡РµРЅРёР№ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё Р·Р°РєР°Р·С‡РёРєРѕРј'],
                         debug=False,
                         ):
-                        
+
     """
     v01.02 08.05.2024
-      изменения:
-      1. после удаления зачеркнутого текста убрать пустые строки
-      2. если вся ячейки по олокнам ниже в строке удалены то не добавлять и строку
-      ['Наименование характеристики', 'Единица измерения характеристики', 'Значение характеристики', 'Тип характеристики',
-      'Тип выбора значений характеристики заказчиком']
-      3. отбор только тех строк, где 'Наименование СПГЗ' и  'Наименование характеристики' не пусты
-      4. првоерка правильности заполнения на листе СПГЗ колонок '№п/п', 'Наименование СПГЗ', 'Единица измерения'
+      РёР·РјРµРЅРµРЅРёСЏ:
+      1. РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ Р·Р°С‡РµСЂРєРЅСѓС‚РѕРіРѕ С‚РµРєСЃС‚Р° СѓР±СЂР°С‚СЊ РїСѓСЃС‚С‹Рµ СЃС‚СЂРѕРєРё
+      2. РµСЃР»Рё РІСЃСЏ СЏС‡РµР№РєРё РїРѕ РѕР»РѕРєРЅР°Рј РЅРёР¶Рµ РІ СЃС‚СЂРѕРєРµ СѓРґР°Р»РµРЅС‹ С‚Рѕ РЅРµ РґРѕР±Р°РІР»СЏС‚СЊ Рё СЃС‚СЂРѕРєСѓ
+      ['РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'Р—РЅР°С‡РµРЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'РўРёРї С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё',
+      'РўРёРї РІС‹Р±РѕСЂР° Р·РЅР°С‡РµРЅРёР№ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё Р·Р°РєР°Р·С‡РёРєРѕРј']
+      3. РѕС‚Р±РѕСЂ С‚РѕР»СЊРєРѕ С‚РµС… СЃС‚СЂРѕРє, РіРґРµ 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—' Рё  'РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё' РЅРµ РїСѓСЃС‚С‹
+      4. РїСЂРІРѕРµСЂРєР° РїСЂР°РІРёР»СЊРЅРѕСЃС‚Рё Р·Р°РїРѕР»РЅРµРЅРёСЏ РЅР° Р»РёСЃС‚Рµ РЎРџР“Р— РєРѕР»РѕРЅРѕРє 'в„–Рї/Рї', 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ'
 
     """
     spgz_header_name_loc_df = pd.read_excel(fn, sheet_name=sh_n_spgz, header=None, nrows=1 )
@@ -297,78 +294,78 @@ def extract_spgz_df_lst(fn, sh_n_spgz, groupby_col='№п/п',
     # print(spgz_header_name_loc_df.values[0,0])
     spgz_code_name = None
     try:
-        spgz_code_name = re.sub( 'Перечень позиций СПГЗ, относящихся к позиции КПГЗ ', '', spgz_header_name_loc_df.values[0,0]).strip()
+        spgz_code_name = re.sub( 'РџРµСЂРµС‡РµРЅСЊ РїРѕР·РёС†РёР№ РЎРџР“Р—, РѕС‚РЅРѕСЃСЏС‰РёС…СЃСЏ Рє РїРѕР·РёС†РёРё РљРџР“Р— ', '', spgz_header_name_loc_df.values[0,0]).strip()
     except Exception as err:
         print("ERROR: extract_spgz_df_lst:")
         print(err)
 
     spgz_characteristics_content_loc_df = pd.read_excel(fn, sheet_name=sh_n_spgz, header=1, #, skiprows=1
-    converters = {'Наименование характеристики':str, 'Единица измерения характеристики':str, 'Значение характеристики':str, 'Тип характеристики':str,
-      'Тип выбора значений характеристики заказчиком':str}
+    converters = {'РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё':str, 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё':str, 'Р—РЅР°С‡РµРЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё':str, 'РўРёРї С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё':str,
+      'РўРёРї РІС‹Р±РѕСЂР° Р·РЅР°С‡РµРЅРёР№ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё Р·Р°РєР°Р·С‡РёРєРѕРј':str}
                                                         )
     spgz_characteristics_content_loc_df = spgz_characteristics_content_loc_df[1:]
     # display(spgz_characteristics_content_loc_df.head())
     # spgz_characteristics_content_loc_df = spgz_characteristics_content_loc_df[
-    #     spgz_characteristics_content_loc_df['Наименование СПГЗ'].notnull() & (spgz_characteristics_content_loc_df['Наименование СПГЗ'].str.len()>0) &
-    #     spgz_characteristics_content_loc_df['Наименование характеристики'].notnull() & (spgz_characteristics_content_loc_df['Наименование характеристики'].str.len()>0)
+    #     spgz_characteristics_content_loc_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—'].notnull() & (spgz_characteristics_content_loc_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—'].str.len()>0) &
+    #     spgz_characteristics_content_loc_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё'].notnull() & (spgz_characteristics_content_loc_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё'].str.len()>0)
     #     ]
 
     unnamed_cols = [col for col in spgz_characteristics_content_loc_df.columns if col.startswith('Unnamed:')]
     spgz_characteristics_content_loc_df.drop(columns=unnamed_cols, inplace=True)
 
-    # проверка корректности заполнения по колонкам '№п/п', 'Наименование СПГЗ', 'Единица измерения'
-    # количество непустых строк по ним должно совпадать поскольку они объединены это не всегда видно визуально
+    # РїСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё Р·Р°РїРѕР»РЅРµРЅРёСЏ РїРѕ РєРѕР»РѕРЅРєР°Рј 'в„–Рї/Рї', 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ'
+    # РєРѕР»РёС‡РµСЃС‚РІРѕ РЅРµРїСѓСЃС‚С‹С… СЃС‚СЂРѕРє РїРѕ РЅРёРј РґРѕР»Р¶РЅРѕ СЃРѕРІРїР°РґР°С‚СЊ РїРѕСЃРєРѕР»СЊРєСѓ РѕРЅРё РѕР±СЉРµРґРёРЅРµРЅС‹ СЌС‚Рѕ РЅРµ РІСЃРµРіРґР° РІРёРґРЅРѕ РІРёР·СѓР°Р»СЊРЅРѕ
 
-    npp_nunique = spgz_characteristics_content_loc_df['№п/п'].nunique()
-    mask_for_value_counts = (spgz_characteristics_content_loc_df['№п/п'].notnull() |
-    spgz_characteristics_content_loc_df['Наименование СПГЗ'].notnull() |
-    spgz_characteristics_content_loc_df['Единица измерения'].notnull()
+    npp_nunique = spgz_characteristics_content_loc_df['в„–Рї/Рї'].nunique()
+    mask_for_value_counts = (spgz_characteristics_content_loc_df['в„–Рї/Рї'].notnull() |
+    spgz_characteristics_content_loc_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—'].notnull() |
+    spgz_characteristics_content_loc_df['Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ'].notnull()
     )
-    # что0нибудь непустое должно быть, если все пустые колонки - не считаем
-    need_value_counts = spgz_characteristics_content_loc_df[mask_for_value_counts].value_counts(['№п/п', 'Наименование СПГЗ', 'Единица измерения'], dropna=False).shape[0]
-    # name_spgz_nunique = spgz_characteristics_content_loc_df['Наименование СПГЗ'].nunique()
-    # ei_nunique = spgz_characteristics_content_loc_df['Единица измерения'].nunique()
+    # С‡С‚Рѕ0РЅРёР±СѓРґСЊ РЅРµРїСѓСЃС‚РѕРµ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ, РµСЃР»Рё РІСЃРµ РїСѓСЃС‚С‹Рµ РєРѕР»РѕРЅРєРё - РЅРµ СЃС‡РёС‚Р°РµРј
+    need_value_counts = spgz_characteristics_content_loc_df[mask_for_value_counts].value_counts(['в„–Рї/Рї', 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ'], dropna=False).shape[0]
+    # name_spgz_nunique = spgz_characteristics_content_loc_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—'].nunique()
+    # ei_nunique = spgz_characteristics_content_loc_df['Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ'].nunique()
     # assert ((npp_nunique!=name_spgz_nunique) and (name_spgz_nunique != ei_nunique) and  (npp_nunique!=ei_nunique),
-    #         "Ошибка заполнения объединенных ячеек по колонкам '№п/п', 'Наименование СПГЗ', 'Единица измерения'"
+    #         "РћС€РёР±РєР° Р·Р°РїРѕР»РЅРµРЅРёСЏ РѕР±СЉРµРґРёРЅРµРЅРЅС‹С… СЏС‡РµРµРє РїРѕ РєРѕР»РѕРЅРєР°Рј 'в„–Рї/Рї', 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ'"
     #         )
     if debug: print(f"npp_nunique: '{npp_nunique}', need_value_counts: '{need_value_counts}'")
     if npp_nunique!= need_value_counts:
-        print("Ошибка заполнения объединенных ячеек по колонкам '№п/п', 'Наименование СПГЗ', 'Единица измерения'")
-        print(spgz_characteristics_content_loc_df[mask_for_value_counts].value_counts(['№п/п', 'Наименование СПГЗ', 'Единица измерения'], dropna=False))
+        print("РћС€РёР±РєР° Р·Р°РїРѕР»РЅРµРЅРёСЏ РѕР±СЉРµРґРёРЅРµРЅРЅС‹С… СЏС‡РµРµРє РїРѕ РєРѕР»РѕРЅРєР°Рј 'в„–Рї/Рї', 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ'")
+        print(spgz_characteristics_content_loc_df[mask_for_value_counts].value_counts(['в„–Рї/Рї', 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ'], dropna=False))
 
-    spgz_characteristics_content_loc_df['CГПЗ Код Наименование'] = spgz_code_name
-    # spgz_characteristics_content_loc_df.columns = ['CГПЗ Код Наименование'] + list(spgz_characteristics_content_loc_df.columns[:-1])
-    spgz_characteristics_content_loc_df = spgz_characteristics_content_loc_df[['CГПЗ Код Наименование'] + list(spgz_characteristics_content_loc_df.columns[:-1])]
+    spgz_characteristics_content_loc_df['CР“РџР— РљРѕРґ РќР°РёРјРµРЅРѕРІР°РЅРёРµ'] = spgz_code_name
+    # spgz_characteristics_content_loc_df.columns = ['CР“РџР— РљРѕРґ РќР°РёРјРµРЅРѕРІР°РЅРёРµ'] + list(spgz_characteristics_content_loc_df.columns[:-1])
+    spgz_characteristics_content_loc_df = spgz_characteristics_content_loc_df[['CР“РџР— РљРѕРґ РќР°РёРјРµРЅРѕРІР°РЅРёРµ'] + list(spgz_characteristics_content_loc_df.columns[:-1])]
 
     for col in unique_test_cols:
-        spgz_characteristics_content_loc_df['Ошибка объединения ячеек\n' + col] = None
+        spgz_characteristics_content_loc_df['РћС€РёР±РєР° РѕР±СЉРµРґРёРЅРµРЅРёСЏ СЏС‡РµРµРє\n' + col] = None
 
     spgz_characteristics_content_loc_df_groupped = spgz_characteristics_content_loc_df.groupby(groupby_col)
 
     for group_name, group_df in spgz_characteristics_content_loc_df_groupped:
         # print(group_name)
-        # # проверка корректности заполнения по колонкам '№п/п', 'Наименование СПГЗ', 'Единица измерения'
-        # # количество непустых строк по ним должно совпадать поскольку они объединены это не всегда видно визуально
+        # # РїСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё Р·Р°РїРѕР»РЅРµРЅРёСЏ РїРѕ РєРѕР»РѕРЅРєР°Рј 'в„–Рї/Рї', 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ'
+        # # РєРѕР»РёС‡РµСЃС‚РІРѕ РЅРµРїСѓСЃС‚С‹С… СЃС‚СЂРѕРє РїРѕ РЅРёРј РґРѕР»Р¶РЅРѕ СЃРѕРІРїР°РґР°С‚СЊ РїРѕСЃРєРѕР»СЊРєСѓ РѕРЅРё РѕР±СЉРµРґРёРЅРµРЅС‹ СЌС‚Рѕ РЅРµ РІСЃРµРіРґР° РІРёРґРЅРѕ РІРёР·СѓР°Р»СЊРЅРѕ
         # npp_len = group_df.shape[0]
-        # name_spgz_len = group_df['Наименование СПГЗ'].nunique()
-        # ei_nunique = group_df['Единица измерения'].nunique()
+        # name_spgz_len = group_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—'].nunique()
+        # ei_nunique = group_df['Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ'].nunique()
         # assert ((npp_nunique!=name_spgz_nunique) and (name_spgz_nunique != ei_nunique) and  (npp_nunique!=ei_nunique),
-        #         "Ошибка заполнения объединенных ячеек по колонкам '№п/п', 'Наименование СПГЗ', 'Единица измерения'"
+        #         "РћС€РёР±РєР° Р·Р°РїРѕР»РЅРµРЅРёСЏ РѕР±СЉРµРґРёРЅРµРЅРЅС‹С… СЏС‡РµРµРє РїРѕ РєРѕР»РѕРЅРєР°Рј 'в„–Рї/Рї', 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ'"
         #         )
         # print(f"npp_nunique: '{npp_nunique}', name_spgz_nunique: '{name_spgz_nunique}', ei_nunique: '{ei_nunique}'")
         for col in unique_test_cols:
             # print(group_df[col].unique())
             if group_df[col].nunique()>1:
                 group_err_str = str(group_df[col].unique().tolist())
-                print(f"'{groupby_col}': '{group_name}'", f"Ошибка группировки (объединения) - в колонке '{col}'")
+                print(f"'{groupby_col}': '{group_name}'", f"РћС€РёР±РєР° РіСЂСѓРїРїРёСЂРѕРІРєРё (РѕР±СЉРµРґРёРЅРµРЅРёСЏ) - РІ РєРѕР»РѕРЅРєРµ '{col}'")
                 print(group_err_str)
                 # display(spgz_characteristics_content_loc_df[(spgz_characteristics_content_loc_df[groupby_col]==group_name)])
                 spgz_characteristics_content_loc_df.loc[
-                    (spgz_characteristics_content_loc_df[groupby_col]==group_name), 'Ошибка объединения ячеек\n' + col] = group_err_str
+                    (spgz_characteristics_content_loc_df[groupby_col]==group_name), 'РћС€РёР±РєР° РѕР±СЉРµРґРёРЅРµРЅРёСЏ СЏС‡РµРµРє\n' + col] = group_err_str
     # display(spgz_characteristics_content_loc_df.head())
     try:
-        spgz_characteristics_content_loc_df['Наименование характеристики'] = spgz_characteristics_content_loc_df[
-            'Наименование характеристики'].apply(trim_right_dot_compress_spaces)
+        spgz_characteristics_content_loc_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё'] = spgz_characteristics_content_loc_df[
+            'РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё'].apply(trim_right_dot_compress_spaces)
     except Exception as err:
         print("ERROR: extract_spgz_df_lst: apply(trim_right_dot_compress_spaces)")
         print(err)
@@ -379,8 +376,8 @@ def extract_spgz_df_lst(fn, sh_n_spgz, groupby_col='№п/п',
         except Exception as err:
             print(f"ERROR: extract_spgz_df_lst: apply(delete_empty_rows_in_cell): col: '{col}'")
             print(err)
-    mask = (spgz_characteristics_content_loc_df['Наименование характеристики'].notnull() &
-      (spgz_characteristics_content_loc_df['Наименование характеристики'].str.len()>0)
+    mask = (spgz_characteristics_content_loc_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё'].notnull() &
+      (spgz_characteristics_content_loc_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё'].str.len()>0)
     )
     # mask = spgz_characteristics_content_loc_df[significant_cols[0]].notnull() & (spgz_characteristics_content_loc_df[significant_cols[0]].str.len()>0)
     # for col in significant_cols[1:]:
@@ -389,15 +386,15 @@ def extract_spgz_df_lst(fn, sh_n_spgz, groupby_col='№п/п',
 
     return spgz_code_name, spgz_characteristics_content_loc_df
 
-def extract_spgz_df_lst_v00(fn, sh_n_spgz, groupby_col='№п/п',
-                        unique_test_cols=['Наименование СПГЗ', 'Единица измерения', 'ОКПД 2', 'Позиция КТРУ']):
+def extract_spgz_df_lst_v00(fn, sh_n_spgz, groupby_col='в„–Рї/Рї',
+                        unique_test_cols=['РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ', 'РћРљРџР” 2', 'РџРѕР·РёС†РёСЏ РљРўР РЈ']):
 
     spgz_header_name_loc_df = pd.read_excel(fn, sheet_name=sh_n_spgz, header=None, nrows=1 )
     # display(kpgz_header_name_loc_df)
     # print(spgz_header_name_loc_df.values[0,0])
     spgz_code_name = None
     try:
-        spgz_code_name = re.sub( 'Перечень позиций СПГЗ, относящихся к позиции КПГЗ ', '', spgz_header_name_loc_df.values[0,0]).strip()
+        spgz_code_name = re.sub( 'РџРµСЂРµС‡РµРЅСЊ РїРѕР·РёС†РёР№ РЎРџР“Р—, РѕС‚РЅРѕСЃСЏС‰РёС…СЃСЏ Рє РїРѕР·РёС†РёРё РљРџР“Р— ', '', spgz_header_name_loc_df.values[0,0]).strip()
     except Exception as err:
         print("ERROR: extract_spgz_df_lst:")
         print(err)
@@ -409,12 +406,12 @@ def extract_spgz_df_lst_v00(fn, sh_n_spgz, groupby_col='№п/п',
     unnamed_cols = [col for col in spgz_characteristics_content_loc_df.columns if col.startswith('Unnamed:')]
     spgz_characteristics_content_loc_df.drop(columns=unnamed_cols, inplace=True)
 
-    spgz_characteristics_content_loc_df['CГПЗ Код Наименование'] = spgz_code_name
-    # spgz_characteristics_content_loc_df.columns = ['CГПЗ Код Наименование'] + list(spgz_characteristics_content_loc_df.columns[:-1])
-    spgz_characteristics_content_loc_df = spgz_characteristics_content_loc_df[['CГПЗ Код Наименование'] + list(spgz_characteristics_content_loc_df.columns[:-1])]
+    spgz_characteristics_content_loc_df['CР“РџР— РљРѕРґ РќР°РёРјРµРЅРѕРІР°РЅРёРµ'] = spgz_code_name
+    # spgz_characteristics_content_loc_df.columns = ['CР“РџР— РљРѕРґ РќР°РёРјРµРЅРѕРІР°РЅРёРµ'] + list(spgz_characteristics_content_loc_df.columns[:-1])
+    spgz_characteristics_content_loc_df = spgz_characteristics_content_loc_df[['CР“РџР— РљРѕРґ РќР°РёРјРµРЅРѕРІР°РЅРёРµ'] + list(spgz_characteristics_content_loc_df.columns[:-1])]
 
     for col in unique_test_cols:
-        spgz_characteristics_content_loc_df['Ошибка объединения ячеек\n' + col] = None
+        spgz_characteristics_content_loc_df['РћС€РёР±РєР° РѕР±СЉРµРґРёРЅРµРЅРёСЏ СЏС‡РµРµРє\n' + col] = None
 
     spgz_characteristics_content_loc_df_groupped = spgz_characteristics_content_loc_df.groupby(groupby_col)
 
@@ -424,14 +421,14 @@ def extract_spgz_df_lst_v00(fn, sh_n_spgz, groupby_col='№п/п',
             # print(group_df[col].unique())
             if group_df[col].nunique()>1:
                 group_err_str = str(group_df[col].unique().tolist())
-                print(f"'{groupby_col}': '{group_name}'", f"Ошибка группировки (объединения) - в колонке '{col}'")
+                print(f"'{groupby_col}': '{group_name}'", f"РћС€РёР±РєР° РіСЂСѓРїРїРёСЂРѕРІРєРё (РѕР±СЉРµРґРёРЅРµРЅРёСЏ) - РІ РєРѕР»РѕРЅРєРµ '{col}'")
                 print(group_err_str)
                 # display(spgz_characteristics_content_loc_df[(spgz_characteristics_content_loc_df[groupby_col]==group_name)])
                 spgz_characteristics_content_loc_df.loc[
-                    (spgz_characteristics_content_loc_df[groupby_col]==group_name), 'Ошибка объединения ячеек\n' + col] = group_err_str
+                    (spgz_characteristics_content_loc_df[groupby_col]==group_name), 'РћС€РёР±РєР° РѕР±СЉРµРґРёРЅРµРЅРёСЏ СЏС‡РµРµРє\n' + col] = group_err_str
     # display(spgz_characteristics_content_loc_df.head())
     try:
-        spgz_characteristics_content_loc_df['Наименование характеристики'] = spgz_characteristics_content_loc_df['Наименование характеристики'].apply(trim_right_dot_compress_spaces)
+        spgz_characteristics_content_loc_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё'] = spgz_characteristics_content_loc_df['РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё'].apply(trim_right_dot_compress_spaces)
     except Exception as err:
         print(err)
 
@@ -448,8 +445,8 @@ def pivot_combine_kpgz_spgz_xlsx(fn_lst):
         # print("kpgz_code_name:", kpgz_code_name)
         spgz_code_name, spgz_characteristics_content_loc_df = extract_spgz_df_lst(fn, sh_n_spgz)
         print("kpgz_code_name:", kpgz_code_name, "spgz_code_name:", spgz_code_name)
-        # col = 'Наименование СПГЗ'
-        # display(spgz_characteristics_content_loc_df[spgz_characteristics_content_loc_df['Ошибка объединения ячеек\n' + col].notnull()])
+        # col = 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—'
+        # display(spgz_characteristics_content_loc_df[spgz_characteristics_content_loc_df['РћС€РёР±РєР° РѕР±СЉРµРґРёРЅРµРЅРёСЏ СЏС‡РµРµРє\n' + col].notnull()])
         kpgz_header_content_df.append(kpgz_header_content_loc_df)
         kpgz_characteristics_content_df.append(kpgz_characteristics_content_loc_df)
         spgz_characteristics_content_df.append(spgz_characteristics_content_loc_df)
@@ -469,7 +466,7 @@ def get_single_value_chars_of_chars(
     spgz_df_value_counts,
     name_char_col, name_char_of_char_col, count_col,
     default_value,
-    value_def_in_spgz = 'Определено в СПГЗ',
+    value_def_in_spgz = 'РћРїСЂРµРґРµР»РµРЅРѕ РІ РЎРџР“Р—',
     debug=False):
 
     spgz_df_value_counts_groupped = spgz_df_value_counts.drop(columns=[count_col]).groupby(name_char_col)
@@ -486,18 +483,18 @@ def get_single_value_chars_of_chars(
             case 0:
                 # chars_of_chars_dict[group_name][name_char_of_char_col] = default_value
                 """
-                (1) Если нет столбца «Условная операция», выполнять следующее:
-                если «Значение характеристики» содержит символы >= и/ или <=,
-                то в поле КПГЗ «Условная операция» указать «Диапазон», иначе указать «Перечисление»
+                (1) Р•СЃР»Рё РЅРµС‚ СЃС‚РѕР»Р±С†Р° В«РЈСЃР»РѕРІРЅР°СЏ РѕРїРµСЂР°С†РёСЏВ», РІС‹РїРѕР»РЅСЏС‚СЊ СЃР»РµРґСѓСЋС‰РµРµ:
+                РµСЃР»Рё В«Р—РЅР°С‡РµРЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРёВ» СЃРѕРґРµСЂР¶РёС‚ СЃРёРјРІРѕР»С‹ >= Рё/ РёР»Рё <=,
+                С‚Рѕ РІ РїРѕР»Рµ РљРџР“Р— В«РЈСЃР»РѕРІРЅР°СЏ РѕРїРµСЂР°С†РёСЏВ» СѓРєР°Р·Р°С‚СЊ В«Р”РёР°РїР°Р·РѕРЅВ», РёРЅР°С‡Рµ СѓРєР°Р·Р°С‚СЊВ В«РџРµСЂРµС‡РёСЃР»РµРЅРёРµВ»
                 """
-                if group_name=='Условная операция': # name_char_of_char
+                if group_name=='РЈСЃР»РѕРІРЅР°СЏ РѕРїРµСЂР°С†РёСЏ': # name_char_of_char
                     if (
-                        '>=' in  chars_of_chars_dict[group_name]['Значение характеристики'] or
-                        '<=' in  chars_of_chars_dict[group_name]['Значение характеристики']
+                        '>=' in  chars_of_chars_dict[group_name]['Р—РЅР°С‡РµРЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё'] or
+                        '<=' in  chars_of_chars_dict[group_name]['Р—РЅР°С‡РµРЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё']
                     ):
-                        chars_of_chars_dict[group_name][name_char_of_char_col] = 'Диапазон'
+                        chars_of_chars_dict[group_name][name_char_of_char_col] = 'Р”РёР°РїР°Р·РѕРЅ'
                     else:
-                        chars_of_chars_dict[group_name][name_char_of_char_col] = 'Перечисление'
+                        chars_of_chars_dict[group_name][name_char_of_char_col] = 'РџРµСЂРµС‡РёСЃР»РµРЅРёРµ'
             case _:
                 chars_of_chars_dict[group_name][name_char_of_char_col] = value_def_in_spgz
     # if spgz_df_value_counts[spgz_df_value_counts.duplicated(name_char_col)].shape[0] > 0:
@@ -525,41 +522,41 @@ def get_joined_chars_of_chars(
         chars_of_chars_dict[group_name][name_char_of_char_col] = None
         group_values_lst = group_df.values[:,-1]
         if debug:
-            print("до переразбиения:")
+            print("РґРѕ РїРµСЂРµСЂР°Р·Р±РёРµРЅРёСЏ:")
             print(group_values_lst)
-        # перазбиваем полученные значения
-        # Типа ['>=1.5<3\n<=3', '>=1.5']
+        # РїРµСЂР°Р·Р±РёРІР°РµРј РїРѕР»СѓС‡РµРЅРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ
+        # РўРёРїР° ['>=1.5<3\n<=3', '>=1.5']
         group_values_lst = [v.split(sep) for v in group_values_lst]
         group_values_lst = [v_element for v_lst in group_values_lst for v_element in v_lst]
         group_values_lst = sorted(list(set(group_values_lst)))
         # if debug:
-        #     print("после переразбиения:")
+        #     print("РїРѕСЃР»Рµ РїРµСЂРµСЂР°Р·Р±РёРµРЅРёСЏ:")
         #     print(group_values_lst)
-        # Обработка ситуации исключения дублей
-        #  ['Взрослые', 'Дети', 'Новорожденные', 'взрослые', 'дети', 'новорожденные']
+        # РћР±СЂР°Р±РѕС‚РєР° СЃРёС‚СѓР°С†РёРё РёСЃРєР»СЋС‡РµРЅРёСЏ РґСѓР±Р»РµР№
+        #  ['Р’Р·СЂРѕСЃР»С‹Рµ', 'Р”РµС‚Рё', 'РќРѕРІРѕСЂРѕР¶РґРµРЅРЅС‹Рµ', 'РІР·СЂРѕСЃР»С‹Рµ', 'РґРµС‚Рё', 'РЅРѕРІРѕСЂРѕР¶РґРµРЅРЅС‹Рµ']
         group_values_set = sorted(set([v.lower() for v in group_values_lst]), key=len, reverse=True)
         if len(set(group_values_set)) < len(group_values_lst):
             group_values_lst = sorted(list_drop_duplicates(group_values_lst, sep))
             # if debug:
-            #     print("после удаления дублей:")
+            #     print("РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ РґСѓР±Р»РµР№:")
             #     print(group_values_lst)
         group_values_str = sep.join(group_values_lst)
         chars_of_chars_dict[group_name][name_char_of_char_col] = group_values_str
         if debug:
-            print("после переразбиения:")
+            print("РїРѕСЃР»Рµ РїРµСЂРµСЂР°Р·Р±РёРµРЅРёСЏ:")
             print(group_values_lst)
     return chars_of_chars_dict
 
 def list_drop_duplicates(group_values_lst, sep, debug=False):
-    # ['Взрослые', 'Дети', 'Новорожденные', 'взрослые', 'дети', 'новорожденные']
-    # sep для того чтобы не было пересейчений с возможными другими разделителями
+    # ['Р’Р·СЂРѕСЃР»С‹Рµ', 'Р”РµС‚Рё', 'РќРѕРІРѕСЂРѕР¶РґРµРЅРЅС‹Рµ', 'РІР·СЂРѕСЃР»С‹Рµ', 'РґРµС‚Рё', 'РЅРѕРІРѕСЂРѕР¶РґРµРЅРЅС‹Рµ']
+    # sep РґР»СЏ С‚РѕРіРѕ С‡С‚РѕР±С‹ РЅРµ Р±С‹Р»Рѕ РїРµСЂРµСЃРµР№С‡РµРЅРёР№ СЃ РІРѕР·РјРѕР¶РЅС‹РјРё РґСЂСѓРіРёРјРё СЂР°Р·РґРµР»РёС‚РµР»СЏРјРё
     group_values_set = sorted(set([v.lower() for v in group_values_lst]), key=len, reverse=True)
-    # сортировка, чтобы удалялиьс сначала наиболее длинные слова, чтобы корткие слова, к-ые могут входить в более длинные слова своим удалением не разрушили общую строку
+    # СЃРѕСЂС‚РёСЂРѕРІРєР°, С‡С‚РѕР±С‹ СѓРґР°Р»СЏР»РёСЊСЃ СЃРЅР°С‡Р°Р»Р° РЅР°РёР±РѕР»РµРµ РґР»РёРЅРЅС‹Рµ СЃР»РѕРІР°, С‡С‚РѕР±С‹ РєРѕСЂС‚РєРёРµ СЃР»РѕРІР°, Рє-С‹Рµ РјРѕРіСѓС‚ РІС…РѕРґРёС‚СЊ РІ Р±РѕР»РµРµ РґР»РёРЅРЅС‹Рµ СЃР»РѕРІР° СЃРІРѕРёРј СѓРґР°Р»РµРЅРёРµРј РЅРµ СЂР°Р·СЂСѓС€РёР»Рё РѕР±С‰СѓСЋ СЃС‚СЂРѕРєСѓ
     if debug: print(group_values_set)
     if len(group_values_set)< len(group_values_lst):
         group_values_str = sep.join(group_values_lst)
         # print(group_values_str)
-        # преимущественно удалим lower
+        # РїСЂРµРёРјСѓС‰РµСЃС‚РІРµРЅРЅРѕ СѓРґР°Р»РёРј lower
         group_values_set_tmp = []
         for vv in group_values_set:
             group_values_str = re.sub(re.escape(vv), '', group_values_str, count=1)
@@ -582,64 +579,64 @@ def create_kpgz_data(
 ):
     spgz_df = spgz_characteristics_content_loc_df.copy()
     cols_for_kpgz_head = {
-        'Характеристики (кол-во)': 'Наименование характеристики',
-        'СПГЗ (кол-во)': 'Наименование СПГЗ',
-        'СПГЗ/ИНП (кол-во)': ['Наименование СПГЗ', 'ИНП'],
-        'ОКПД-2': 'ОКПД 2',
-        # 'Код характеристики КТРУ': 'Позиция КТРУ',
-        'Позиция КТРУ': 'Позиция КТРУ',
+        'РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё (РєРѕР»-РІРѕ)': 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё',
+        'РЎРџР“Р— (РєРѕР»-РІРѕ)': 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—',
+        'РЎРџР“Р—/РРќРџ (РєРѕР»-РІРѕ)': ['РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—', 'РРќРџ'],
+        'РћРљРџР”-2': 'РћРљРџР” 2',
+        # 'РљРѕРґ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё РљРўР РЈ': 'РџРѕР·РёС†РёСЏ РљРўР РЈ',
+        'РџРѕР·РёС†РёСЏ РљРўР РЈ': 'РџРѕР·РёС†РёСЏ РљРўР РЈ',
     }
     kpgz_head_indicators_type = {
-        'Характеристики (кол-во)': 'Количество',
-        'СПГЗ/ИНП (кол-во)': 'Количество',
-        'СПГЗ (кол-во)': 'Количество',
-        'ОКПД-2': 'Перечень',
-        'Позиция КТРУ': 'Перечень',}
+        'РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё (РєРѕР»-РІРѕ)': 'РљРѕР»РёС‡РµСЃС‚РІРѕ',
+        'РЎРџР“Р—/РРќРџ (РєРѕР»-РІРѕ)': 'РљРѕР»РёС‡РµСЃС‚РІРѕ',
+        'РЎРџР“Р— (РєРѕР»-РІРѕ)': 'РљРѕР»РёС‡РµСЃС‚РІРѕ',
+        'РћРљРџР”-2': 'РџРµСЂРµС‡РµРЅСЊ',
+        'РџРѕР·РёС†РёСЏ РљРўР РЈ': 'РџРµСЂРµС‡РµРЅСЊ',}
 
     kpgz_head = {}
 
-    name_char_col='Наименование характеристики'
+    name_char_col='РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё'
     count_col = 'count'
     char_of_char_cols_lst = [
-        'Единица измерения характеристики',
-        'Значение характеристики',
-        'Тип характеристики',
-        'Условная операция',
-        'Тип выбора значений характеристики заказчиком',
-        'Позиция КТРУ',
+        'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё',
+        'Р—РЅР°С‡РµРЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё',
+        'РўРёРї С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё',
+        'РЈСЃР»РѕРІРЅР°СЏ РѕРїРµСЂР°С†РёСЏ',
+        'РўРёРї РІС‹Р±РѕСЂР° Р·РЅР°С‡РµРЅРёР№ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё Р·Р°РєР°Р·С‡РёРєРѕРј',
+        'РџРѕР·РёС†РёСЏ РљРўР РЈ',
     ]
     sep_lst = {
-        'Единица измерения характеристики': ';\n',
-        'Значение характеристики': '\n',
+        'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё': ';\n',
+        'Р—РЅР°С‡РµРЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё': '\n',
     }
     default_value_lst = {
-        'Условная операция': 'Перечисление',
+        'РЈСЃР»РѕРІРЅР°СЏ РѕРїРµСЂР°С†РёСЏ': 'РџРµСЂРµС‡РёСЃР»РµРЅРёРµ',
     }
 
-    value_def_in_spgz = 'Определено в СПГЗ'
+    value_def_in_spgz = 'РћРїСЂРµРґРµР»РµРЅРѕ РІ РЎРџР“Р—'
 
     missing_columns = []
 
-    # 'Определено в СПГЗ'
+    # 'РћРїСЂРµРґРµР»РµРЅРѕ РІ РЎРџР“Р—'
     for sub_kpgz_head, cols in cols_for_kpgz_head.items():
         if (
             ((type(cols)==list) and set(cols).issubset(set(spgz_df.columns))) or
             ((type(cols)==str) and cols in spgz_df.columns)
         ):
 
-            if kpgz_head_indicators_type[sub_kpgz_head]=='Количество':
+            if kpgz_head_indicators_type[sub_kpgz_head]=='РљРѕР»РёС‡РµСЃС‚РІРѕ':
                 if type(cols)==str:
                     kpgz_head[sub_kpgz_head] = spgz_df[cols].nunique()
                     # print(f"'{cols}'", spgz_df[cols].nunique())
                 elif type(cols)==list:
                     kpgz_head[sub_kpgz_head] = spgz_df.value_counts(cols).shape[0]
                     # print(f"'{cols}'", spgz_df.value_counts(cols).shape[0])
-            elif kpgz_head_indicators_type[sub_kpgz_head]=='Перечень':
+            elif kpgz_head_indicators_type[sub_kpgz_head]=='РџРµСЂРµС‡РµРЅСЊ':
                     kpgz_head[sub_kpgz_head] = sorted(spgz_df[cols].unique())
-                    # только для одиночных колонок
+                    # С‚РѕР»СЊРєРѕ РґР»СЏ РѕРґРёРЅРѕС‡РЅС‹С… РєРѕР»РѕРЅРѕРє
                     # print(spgz_df[cols].unique()[:5])
         else:
-            print(f"Колонка/колонки '{cols}' отсутствуют в данных")
+            print(f"РљРѕР»РѕРЅРєР°/РєРѕР»РѕРЅРєРё '{cols}' РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‚ РІ РґР°РЅРЅС‹С…")
     if debug:
         print("kpgz_head:")
         pprint(kpgz_head)
@@ -653,10 +650,6 @@ def create_kpgz_data(
             value_counts_cols_pair = [name_char_col, col]
             if debug: print(f"{value_counts_cols_pair}")
             spgz_df_value_counts = spgz_df.value_counts(value_counts_cols_pair).reset_index().sort_values(value_counts_cols_pair)
-            if count_col not in spgz_df_value_counts.columns and 0 in spgz_df_value_counts.columns:
-                spgz_df_value_counts.rename(columns={0:count_col}, inplace=True)
-                # особенность pandas Python v 3.10
-            # print("spgz_df_value_counts.columns:", spgz_df_value_counts.columns)
             # display(spgz_df_value_counts)
             if sep_lst.get(name_char_of_char_col) is not None:
                 sep = sep_lst.get(name_char_of_char_col)
@@ -677,15 +670,15 @@ def create_kpgz_data(
                     spgz_df_value_counts,
                     name_char_col, name_char_of_char_col, count_col,
                     default_value=default_value_lst.get(name_char_of_char_col),
-                    value_def_in_spgz = value_def_in_spgz, #'Определено в СПГЗ',
+                    value_def_in_spgz = value_def_in_spgz, #'РћРїСЂРµРґРµР»РµРЅРѕ РІ РЎРџР“Р—',
                     debug=False)
         else:
-            logger.error(f"Колонка '{name_char_of_char_col}' отсутствует в данных")
+            logger.error(f"РљРѕР»РѕРЅРєР° '{name_char_of_char_col}' РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РІ РґР°РЅРЅС‹С…")
             missing_columns.append(name_char_of_char_col)
             for key, value_dict in chars_of_chars_dict.items():
                 chars_of_chars_dict[key][name_char_of_char_col] = default_value_lst.get(name_char_of_char_col)
 
-    # name_char_col='Наименование характеристики'
+    # name_char_col='РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё'
     chars_of_chars_dict_lst = []
     for key, value_dict in chars_of_chars_dict.items():
         loc_dict = {name_char_col: key}
@@ -694,7 +687,7 @@ def create_kpgz_data(
 
     # chars_of_chars_dict_lst[:5]
     chars_of_chars_df = pd.DataFrame(chars_of_chars_dict_lst)
-    chars_of_chars_df.rename(columns ={'Позиция КТРУ': 'Код характеристики КТРУ'}, inplace=True)
+    chars_of_chars_df.rename(columns ={'РџРѕР·РёС†РёСЏ РљРўР РЈ': 'РљРѕРґ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё РљРўР РЈ'}, inplace=True)
     # chars_of_chars_df.head()
 
     return kpgz_head, chars_of_chars_df
@@ -705,8 +698,8 @@ def get_total_okpd2_code_name(
     debug=False,
 
 ):
-    if debug: print(kpgz_head['ОКПД-2'])
-    okpd2_lst = kpgz_head['ОКПД-2']
+    if debug: print(kpgz_head['РћРљРџР”-2'])
+    okpd2_lst = kpgz_head['РћРљРџР”-2']
     if okpd2_lst is not None and (len(okpd2_lst) > 0):
         okpd2_lst_upd = [code_name.replace('\n','').strip() for code_name in okpd2_lst]
         if '-' in okpd2_lst_upd:
@@ -727,9 +720,9 @@ def get_total_okpd2_code_name(
 
         okpd2_code_prefix = clean_str(okpd2_code_prefix)
         if debug: print(f"okpd2_code_prefix: '{okpd2_code_prefix}'")
-        # ['КОД РАЗДЕЛА', 'НАИМЕНОВАНИЕ РАЗДЕЛА', 'КОД ПОЗИЦИИ', 'НАИМЕНОВАНИЕ ПОЗИЦИИ']
-        # ['Код', 'Наименование', 'Комментарий', 'Тип кода']
-        okpd2_code_name_lst = okpd2_df[okpd2_df['Код']==okpd2_code_prefix]['Наименование'].values
+        # ['РљРћР” Р РђР—Р”Р•Р›Рђ', 'РќРђРРњР•РќРћР’РђРќРР• Р РђР—Р”Р•Р›Рђ', 'РљРћР” РџРћР—РР¦РР', 'РќРђРРњР•РќРћР’РђРќРР• РџРћР—РР¦РР']
+        # ['РљРѕРґ', 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ', 'РљРѕРјРјРµРЅС‚Р°СЂРёР№', 'РўРёРї РєРѕРґР°']
+        okpd2_code_name_lst = okpd2_df[okpd2_df['РљРѕРґ']==okpd2_code_prefix]['РќР°РёРјРµРЅРѕРІР°РЅРёРµ'].values
         if debug: print("okpd2_code_name_lst:", okpd2_code_name_lst)
         if len(okpd2_code_name_lst) > 0:
             return okpd2_code_prefix + ' ' + okpd2_code_name_lst[0]
@@ -738,7 +731,7 @@ def get_total_okpd2_code_name(
 
 def get_total_ktru_code_name(
     kpgz_head,
-    ktru_obj_name = 'Позиция КТРУ',
+    ktru_obj_name = 'РџРѕР·РёС†РёСЏ РљРўР РЈ',
     # ktru_df,
     sep='|\n',
     debug=False,
@@ -817,22 +810,22 @@ def write_head_kpgz_sheet(
 
     wb = Workbook()
     ws = wb.active
-    ws.title = 'КПГЗ'
+    ws.title = 'РљРџР“Р—'
 
-    ws['A1'] = 'Позиция КПГЗ ' + spgz_code_name
+    ws['A1'] = 'РџРѕР·РёС†РёСЏ РљРџР“Р— ' + spgz_code_name
     ws['A1'].font = ft_bold
     ws['A1'].border = thin_border
     ws['A1'].alignment = Alignment(wrap_text=True,vertical='top', horizontal='center')
 
-    ws['A2'] = 'Статус'
+    ws['A2'] = 'РЎС‚Р°С‚СѓСЃ'
     ws['A2'].font = ft_bold
-    ws['B2'] = 'Утверждена'
+    ws['B2'] = 'РЈС‚РІРµСЂР¶РґРµРЅР°'
     ws['A2'].border = thin_border
     ws['B2'].border = thin_border
 
-    ws['A3'] = 'ОКПД-2'
+    ws['A3'] = 'РћРљРџР”-2'
     ws['A3'].font = ft_bold
-    # ws['B3'] = kpgz_head['ОКПД-2'][0]  #okpd2
+    # ws['B3'] = kpgz_head['РћРљРџР”-2'][0]  #okpd2
     ws['B3'] = get_total_okpd2_code_name(
                 kpgz_head,
                 okpd2_df,
@@ -840,7 +833,7 @@ def write_head_kpgz_sheet(
     ws['A3'].border = thin_border
     ws['B3'].border = thin_border
 
-    ws['A4'] = 'Позиция КТРУ'
+    ws['A4'] = 'РџРѕР·РёС†РёСЏ РљРўР РЈ'
     ws['A4'].font = ft_bold
     ws['A4'].border = thin_border
     ws['B4'].border = thin_border
@@ -850,32 +843,32 @@ def write_head_kpgz_sheet(
     if ktru_is_lst and (type(ktru_lst)!=str):
         ws['B4'].fill =  PatternFill('solid', fgColor='00C0C0C0')
 
-    ws['A5'] = 'Уровень детализации адреса'
+    ws['A5'] = 'РЈСЂРѕРІРµРЅСЊ РґРµС‚Р°Р»РёР·Р°С†РёРё Р°РґСЂРµСЃР°'
     ws['A5'].font = ft_bold
     ws['B5'] = '-'
     ws['A5'].border = thin_border
     ws['B5'].border = thin_border
 
-    ws['A6'] = 'Загружено из ЕМИАС'
+    ws['A6'] = 'Р—Р°РіСЂСѓР¶РµРЅРѕ РёР· Р•РњРРђРЎ'
     ws['A6'].font = ft_bold
-    ws['B6'] = 'Нет'
+    ws['B6'] = 'РќРµС‚'
     ws['A6'].border = thin_border
     ws['B6'].border = thin_border
 
-    ws['A7'] = 'Характеристики (кол-во)'
+    ws['A7'] = 'РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё (РєРѕР»-РІРѕ)'
     ws['A7'].font = ft_bold
-    ws['B7'] = str(kpgz_head['Характеристики (кол-во)'])
+    ws['B7'] = str(kpgz_head['РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё (РєРѕР»-РІРѕ)'])
     ws['A7'].border = thin_border
     ws['B7'].border = thin_border
 
-    ws['A8'] = 'СПГЗ (кол-во)'
+    ws['A8'] = 'РЎРџР“Р— (РєРѕР»-РІРѕ)'
     ws['A8'].font = ft_bold
-    ws['B8'] = f"{kpgz_head['СПГЗ (кол-во)']} (СПГЗ/ИНП (кол-во) {kpgz_head['СПГЗ/ИНП (кол-во)']})"
+    ws['B8'] = f"{kpgz_head['РЎРџР“Р— (РєРѕР»-РІРѕ)']} (РЎРџР“Р—/РРќРџ (РєРѕР»-РІРѕ) {kpgz_head['РЎРџР“Р—/РРќРџ (РєРѕР»-РІРѕ)']})"
     ws['A8'].border = thin_border
     ws['B8'].border = thin_border
 
 
-    ws['A10'] = 'Справочник характеристик и их значений позиции КПГЗ ' + spgz_code_name
+    ws['A10'] = 'РЎРїСЂР°РІРѕС‡РЅРёРє С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє Рё РёС… Р·РЅР°С‡РµРЅРёР№ РїРѕР·РёС†РёРё РљРџР“Р— ' + spgz_code_name
     ws['A10'].font = ft_bold
     ws['A10'].border = thin_border
     ws['B10'].border = thin_border
@@ -921,19 +914,19 @@ def write_head_kpgz_sheet(
     ws.merge_cells('B7:G7')
     ws.merge_cells('B8:G8')
 
-    ws_target = wb.create_sheet('СПГЗ')
-    # ws_target = wb_source.copy_worksheet(ws_source) # Не работает
-    # ws_target = ws_source.rows # Не работает
+    ws_target = wb.create_sheet('РЎРџР“Р—')
+    # ws_target = wb_source.copy_worksheet(ws_source) # РќРµ СЂР°Р±РѕС‚Р°РµС‚
+    # ws_target = ws_source.rows # РќРµ СЂР°Р±РѕС‚Р°РµС‚
 
     # wb.save(os.path.join(data_processed_dir, fn_save))
 
     wb_source = load_workbook(filename=os.path.join(data_source_dir, fn_source)) #, read_only=False)
-    ws_source = wb_source['СПГЗ']
+    ws_source = wb_source['РЎРџР“Р—']
 
     for i in range(1, ws_source.max_column + 1):
         ws_target.column_dimensions[get_column_letter(i)].width = ws_source.column_dimensions[get_column_letter(i)].width
     for row in ws_source.iter_rows():
-        # ws_target.append(row) # не работает
+        # ws_target.append(row) # РЅРµ СЂР°Р±РѕС‚Р°РµС‚
         for cell in row:
             ws_target[cell.coordinate ] = cell.value
             ws_target[cell.coordinate ].alignment = copy(cell.alignment)
@@ -946,7 +939,7 @@ def write_head_kpgz_sheet(
 
     wb.save(os.path.join(data_processed_dir, fn_save))
 
-    logger.info(f"Файл '{fn_save}' - сохранен в папке '{data_processed_dir}'")
+    logger.info(f"Р¤Р°Р№Р» '{fn_save}' - СЃРѕС…СЂР°РЅРµРЅ РІ РїР°РїРєРµ '{data_processed_dir}'")
 
     return
 
@@ -968,9 +961,9 @@ def main(
     # if not os.path.exists(data_tmp_dir): os.mkdir(data_tmp_dir)
 
     if fn_source is None or sh_n_source is None:
-        # logger.error("Необходимо выбрать файл и лист Excel для обработки")
-        logger.error("Не указаны файл и лист Excel для обработки")
-        logger.error("Работа программы прекращена")
+        # logger.error("РќРµРѕР±С…РѕРґРёРјРѕ РІС‹Р±СЂР°С‚СЊ С„Р°Р№Р» Рё Р»РёСЃС‚ Excel РґР»СЏ РѕР±СЂР°Р±РѕС‚РєРё")
+        logger.error("РќРµ СѓРєР°Р·Р°РЅС‹ С„Р°Р№Р» Рё Р»РёСЃС‚ Excel РґР»СЏ РѕР±СЂР°Р±РѕС‚РєРё")
+        logger.error("Р Р°Р±РѕС‚Р° РїСЂРѕРіСЂР°РјРјС‹ РїСЂРµРєСЂР°С‰РµРЅР°")
         sys.exit(2)
     # split_merged_cells_in_dir(data_source_dir, data_tmp_dir, debug=False)
     fn_path = os.path.join(data_source_dir, fn_source)
@@ -981,10 +974,10 @@ def main(
     spgz_code_name, spgz_characteristics_content_loc_df = extract_spgz_df_lst(
       fn=os.path.join(data_tmp_dir, fn_source),
       sh_n_spgz=sh_n_source,
-      groupby_col='№п/п',
-      unique_test_cols=['Наименование СПГЗ', 'Единица измерения', 'ОКПД 2', 'Позиция КТРУ'],
+      groupby_col='в„–Рї/Рї',
+      unique_test_cols=['РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ', 'РћРљРџР” 2', 'РџРѕР·РёС†РёСЏ РљРўР РЈ'],
       significant_cols = [
-          'Наименование характеристики', 'Единица измерения характеристики', 'Значение характеристики', 'Тип характеристики', 'Тип выбора значений характеристики заказчиком'],
+          'РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'Р—РЅР°С‡РµРЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'РўРёРї С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'РўРёРї РІС‹Р±РѕСЂР° Р·РЅР°С‡РµРЅРёР№ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё Р·Р°РєР°Р·С‡РёРєРѕРј'],
     )
     if debug: print(spgz_code_name)
     kpgz_head, chars_of_chars_df = create_kpgz_data(spgz_characteristics_content_loc_df, debug = False)
@@ -1003,16 +996,15 @@ def main(
     )
 
 def main_02(
-    sh_n_source = 'СПГЗ',
+    sh_n_source = 'РЎРџР“Р—',
     data_source_dir = '/content/data/source',
     data_processed_dir = '/content/data/processed',
     data_tmp_dir = '/content/data/tmp',
-    supp_dict_dir = '/content/data/supp_dict_dir',
     source_code_dir = '/content/cllct_rm_chars',
     debug=False,
 ):
 
-    okpd2_df = read_okpd_dict(supp_dict_dir=supp_dict_dir)
+    okpd2_df = read_okpd_dict()
 
     # save_dir=os.path.join(data_source_dir, '!')
     # if not os.path.exists(save_dir): os.mkdir(save_dir)
@@ -1021,20 +1013,20 @@ def main_02(
     fn_lst = os.listdir(data_source_dir)
     fn_lst = [fn for fn in  fn_lst if fn.endswith('.xlsx')]
     if len (fn_lst) == 0:
-        logger.error(f"В папке '{data_source_dir}' не найдены .xlsx файлы")
+        logger.error(f"Р’ РїР°РїРєРµ '{data_source_dir}' РЅРµ РЅР°Р№РґРµРЅС‹ .xlsx С„Р°Р№Р»С‹")
     for fn_source in fn_lst:
         fn_path = os.path.join(data_source_dir, fn_source)
         fn_proc_save = split_merged_cells(fn_path, sh_n_spgz=sh_n_source, save_dir=data_tmp_dir, debug=False)
 
-        # df_rm_source = read_data(data_tmp_dir, fn_source, sh_n_source, )
+        df_rm_source = read_data(data_tmp_dir, fn_source, sh_n_source, )
 
         spgz_code_name, spgz_characteristics_content_loc_df = extract_spgz_df_lst(
           fn=os.path.join(data_tmp_dir, fn_source),
           sh_n_spgz=sh_n_source,
-          groupby_col='№п/п',
-          unique_test_cols=['Наименование СПГЗ', 'Единица измерения', 'ОКПД 2', 'Позиция КТРУ'],
+          groupby_col='в„–Рї/Рї',
+          unique_test_cols=['РќР°РёРјРµРЅРѕРІР°РЅРёРµ РЎРџР“Р—', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ', 'РћРљРџР” 2', 'РџРѕР·РёС†РёСЏ РљРўР РЈ'],
           significant_cols = [
-              'Наименование характеристики', 'Единица измерения характеристики', 'Значение характеристики', 'Тип характеристики', 'Тип выбора значений характеристики заказчиком'],
+              'РќР°РёРјРµРЅРѕРІР°РЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'Р•РґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'Р—РЅР°С‡РµРЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'РўРёРї С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё', 'РўРёРї РІС‹Р±РѕСЂР° Р·РЅР°С‡РµРЅРёР№ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё Р·Р°РєР°Р·С‡РёРєРѕРј'],
         )
         if debug: print(spgz_code_name)
         kpgz_head, chars_of_chars_df = create_kpgz_data(spgz_characteristics_content_loc_df, debug = False)

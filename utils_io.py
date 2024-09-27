@@ -333,12 +333,12 @@ def get_cols_width_exists(dir, fn, sh_n):
         cols_width_exists.append(ws.column_dimensions[cell.column_letter].width)
     return cols_width_exists
 
-import py7zr
-def un_7zip(data_source_dir, fn_zip):
-    # if zipfile.is_zipfile(os.path.join(data_source_dir, fn_zip)):
-        # with zipfile.open(os.path.join(data_source_dir, fn_zip), 'r') as tar:
-    # else:
-    #     print(f"'{fn_tar_gz}' is not zip file")
-    with py7zr.SevenZipFile(os.path.join(data_source_dir, fn_zip), 'r') as z:
-        print(z.list())
-        z.extractall(path=data_source_dir)
+# import py7zr
+# def un_7zip(data_source_dir, fn_zip):
+#     # if zipfile.is_zipfile(os.path.join(data_source_dir, fn_zip)):
+#         # with zipfile.open(os.path.join(data_source_dir, fn_zip), 'r') as tar:
+#     # else:
+#     #     print(f"'{fn_tar_gz}' is not zip file")
+#     with py7zr.SevenZipFile(os.path.join(data_source_dir, fn_zip), 'r') as z:
+#         print(z.list())
+#         z.extractall(path=data_source_dir)
