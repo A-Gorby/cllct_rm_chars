@@ -637,6 +637,11 @@ def list_drop_duplicates(group_values_lst, sep, debug=False):
 def create_kpgz_data(
     spgz_characteristics_content_loc_df, debug = False,
 ):
+    """
+    v01.02 21.10.2024
+        bag_fix
+            'Код КТРУ характеристики',
+    """
     spgz_df = spgz_characteristics_content_loc_df.copy()
     cols_for_kpgz_head = {
         'Характеристики (кол-во)': 'Наименование характеристики',
@@ -737,7 +742,7 @@ def create_kpgz_data(
                     debug=False)
         else:
             logger.error(f"Колонка '{name_char_of_char_col}' отсутствует в данных (Таблица)")
-            print(spgz_df.columns)
+            # print(spgz_df.columns)
             missing_columns.append(name_char_of_char_col)
             for key, value_dict in chars_of_chars_dict.items():
                 chars_of_chars_dict[key][name_char_of_char_col] = default_value_lst.get(name_char_of_char_col)
@@ -751,7 +756,10 @@ def create_kpgz_data(
 
     # chars_of_chars_dict_lst[:5]
     chars_of_chars_df = pd.DataFrame(chars_of_chars_dict_lst)
-    chars_of_chars_df.rename(columns ={'Код КТРУ характеристики': 'Код характеристики КТРУ'}, inplace=True)
+    try:
+        chars_of_chars_df.rename(columns ={'Код КТРУ характеристики': 'Код характеристики КТРУ'}, inplace=True)
+    except:
+        pass
 
     # chars_of_chars_df.head()
 
