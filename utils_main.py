@@ -1024,8 +1024,9 @@ def write_head_kpgz_sheet(
         ws[get_column_letter(i) + f"{i_row}"].alignment = Alignment(wrap_text=True,vertical='top', horizontal='center')
         ws[get_column_letter(i) + f"{i_row}"].border = thin_border
 
-    ws.append(list(range(1,len(chars_of_chars_df.columns) + 2)))
     i_row = 12
+    # ws.append(list(range(1,len(chars_of_chars_df.columns) + 2)))
+    ws.append(list(range(1,len(chars_of_chars_df.columns) + 1)))
     for i in range(1, len(column_widths)+1):  # ,1 to start at 1
         ws[get_column_letter(i) + f"{i_row}"].font = ft_bold
         ws[get_column_letter(i) + f"{i_row}"].alignment = Alignment(wrap_text=True,vertical='top', horizontal='center')
