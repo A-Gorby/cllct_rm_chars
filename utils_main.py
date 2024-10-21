@@ -273,6 +273,138 @@ def extract_kpgz_df_lst(fn, sh_n_kpgz, debug=False):
     return kpgz_code_name, kpgz_header_content_loc_df, kpgz_characteristics_content_loc_df
 
 def extract_spgz_df_lst(fn, sh_n_spgz, groupby_col='№п/п',
+                        unique_test_cols=['Наименование СПГЗ', 'Единица измерения', 'ОКПД 2', 
+                                          'Позиция КТРУ'
+                                          # 'Код характеристики КТРУ'
+                                          ],
+                        significant_cols = ['Наименование характеристики', 'Единица измерения характеристики', 'Значение характеристики', 
+                                            'Тип характеристики', 
+                                            'Условная операция',
+                                            'Тип выбора значений характеристики заказчиком',
+                                            # 'Код характеристики КТРУ'
+                                            'Код КТРУ характеристики',
+                                            ],
+                        debug=False,
+                        ):
+
+    """
+    v01.02 08.05.2024
+      изменения:
+      1. после удаления зачеркнутого текста убрать пустые строки
+      2. если вся ячейки по олокнам ниже в строке удалены то не добавлять и строку
+      ['Наименование характеристики', 'Единица измерения характеристики', 'Значение характеристики', 'Тип характеристики',
+      'Тип выбора значений характеристики заказчиком']
+      3. отбор только тех строк, где 'Наименование СПГЗ' и  'Наименование характеристики' не пусты
+      4. проверка правильности заполнения на листе СПГЗ колонок '№п/п', 'Наименование СПГЗ', 'Единица измерения'
+
+    v01.03 21.10.2024
+    изменения:
+    'Код КТРУ характеристики'- он же 'Код характеристики КТРУ'
+
+    """
+    spgz_header_name_loc_df = pd.read_excel(fn, sheet_name=sh_n_spgz, header=None, nrows=1 )
+    # display(kpgz_header_name_loc_df)
+    # print(spgz_header_name_loc_df.values[0,0])
+    spgz_code_name = None
+    try:
+        spgz_code_name = re.sub( 'Перечень позиций СПГЗ, относящихся к позиции КПГЗ ', '', spgz_header_name_loc_df.values[0,0]).strip()
+    except Exception as err:
+        print("ERROR: extract_spgz_df_lst:")
+        print(err)
+
+    spgz_characteristics_content_loc_df = pd.read_excel(fn, sheet_name=sh_n_spgz, header=1, #, skiprows=1
+    converters = {'Наименование характеристики':str, 'Единица измерения характеристики':str, 'Значение характеристики':str, 'Тип характеристики':str,
+      'Условная операция':str,                  
+      'Тип выбора значений характеристики заказчиком':str,
+      'Код КТРУ характеристики':str,
+      'Позиция КТРУ':str,
+                  }
+                                                        )
+    spgz_characteristics_content_loc_df = spgz_characteristics_content_loc_df[1:]
+    # display(spgz_characteristics_content_loc_df.head())
+    # spgz_characteristics_content_loc_df = spgz_characteristics_content_loc_df[
+    #     spgz_characteristics_content_loc_df['Наименование СПГЗ'].notnull() & (spgz_characteristics_content_loc_df['Наименование СПГЗ'].str.len()>0) &
+    #     spgz_characteristics_content_loc_df['Наименование характеристики'].notnull() & (spgz_characteristics_content_loc_df['Наименование характеристики'].str.len()>0)
+    #     ]
+
+    unnamed_cols = [col for col in spgz_characteristics_content_loc_df.columns if col.startswith('Unnamed:')]
+    spgz_characteristics_content_loc_df.drop(columns=unnamed_cols, inplace=True)
+
+    # проверка корректности заполнения по колонкам '№п/п', 'Наименование СПГЗ', 'Единица измерения'
+    # количество непустых строк по ним должно совпадать поскольку они объединены это не всегда видно визуально
+
+    npp_nunique = spgz_characteristics_content_loc_df['№п/п'].nunique()
+    mask_for_value_counts = (spgz_characteristics_content_loc_df['№п/п'].notnull() |
+    spgz_characteristics_content_loc_df['Наименование СПГЗ'].notnull() |
+    spgz_characteristics_content_loc_df['Единица измерения'].notnull()
+    )
+    # что0нибудь непустое должно быть, если все пустые колонки - не считаем
+    need_value_counts = spgz_characteristics_content_loc_df[mask_for_value_counts].value_counts(['№п/п', 'Наименование СПГЗ', 'Единица измерения'], dropna=False).shape[0]
+    # name_spgz_nunique = spgz_characteristics_content_loc_df['Наименование СПГЗ'].nunique()
+    # ei_nunique = spgz_characteristics_content_loc_df['Единица измерения'].nunique()
+    # assert ((npp_nunique!=name_spgz_nunique) and (name_spgz_nunique != ei_nunique) and  (npp_nunique!=ei_nunique),
+    #         "Ошибка заполнения объединенных ячеек по колонкам '№п/п', 'Наименование СПГЗ', 'Единица измерения'"
+    #         )
+    if debug: print(f"npp_nunique: '{npp_nunique}', need_value_counts: '{need_value_counts}'")
+    if npp_nunique!= need_value_counts:
+        print("Ошибка заполнения объединенных ячеек по колонкам '№п/п', 'Наименование СПГЗ', 'Единица измерения'")
+        print(spgz_characteristics_content_loc_df[mask_for_value_counts].value_counts(['№п/п', 'Наименование СПГЗ', 'Единица измерения'], dropna=False))
+
+    spgz_characteristics_content_loc_df['CГПЗ Код Наименование'] = spgz_code_name
+    # spgz_characteristics_content_loc_df.columns = ['CГПЗ Код Наименование'] + list(spgz_characteristics_content_loc_df.columns[:-1])
+    spgz_characteristics_content_loc_df = spgz_characteristics_content_loc_df[['CГПЗ Код Наименование'] + list(spgz_characteristics_content_loc_df.columns[:-1])]
+
+    for col in unique_test_cols:
+        spgz_characteristics_content_loc_df['Ошибка объединения ячеек\n' + col] = None
+
+    spgz_characteristics_content_loc_df_groupped = spgz_characteristics_content_loc_df.groupby(groupby_col)
+
+    for group_name, group_df in spgz_characteristics_content_loc_df_groupped:
+        # print(group_name)
+        # # проверка корректности заполнения по колонкам '№п/п', 'Наименование СПГЗ', 'Единица измерения'
+        # # количество непустых строк по ним должно совпадать поскольку они объединены это не всегда видно визуально
+        # npp_len = group_df.shape[0]
+        # name_spgz_len = group_df['Наименование СПГЗ'].nunique()
+        # ei_nunique = group_df['Единица измерения'].nunique()
+        # assert ((npp_nunique!=name_spgz_nunique) and (name_spgz_nunique != ei_nunique) and  (npp_nunique!=ei_nunique),
+        #         "Ошибка заполнения объединенных ячеек по колонкам '№п/п', 'Наименование СПГЗ', 'Единица измерения'"
+        #         )
+        # print(f"npp_nunique: '{npp_nunique}', name_spgz_nunique: '{name_spgz_nunique}', ei_nunique: '{ei_nunique}'")
+        for col in unique_test_cols:
+            # print(group_df[col].unique())
+            if group_df[col].nunique()>1:
+                group_err_str = str(group_df[col].unique().tolist())
+                print(f"'{groupby_col}': '{group_name}'", f"Ошибка группировки (объединения) - в колонке '{col}'")
+                print(group_err_str)
+                # display(spgz_characteristics_content_loc_df[(spgz_characteristics_content_loc_df[groupby_col]==group_name)])
+                spgz_characteristics_content_loc_df.loc[
+                    (spgz_characteristics_content_loc_df[groupby_col]==group_name), 'Ошибка объединения ячеек\n' + col] = group_err_str
+    # display(spgz_characteristics_content_loc_df.head())
+    try:
+        spgz_characteristics_content_loc_df['Наименование характеристики'] = spgz_characteristics_content_loc_df[
+            'Наименование характеристики'].apply(trim_right_dot_compress_spaces)
+    except Exception as err:
+        print("ERROR: extract_spgz_df_lst: apply(trim_right_dot_compress_spaces)")
+        print(err)
+    # for col in significant_cols:
+    for col in list(set(unique_test_cols + significant_cols)):
+        try:
+            spgz_characteristics_content_loc_df[col] = spgz_characteristics_content_loc_df[col].apply(
+                delete_empty_rows_in_cell)
+        except Exception as err:
+            print(f"ERROR: extract_spgz_df_lst: apply(delete_empty_rows_in_cell): col: '{col}'")
+            print(err)
+    mask = (spgz_characteristics_content_loc_df['Наименование характеристики'].notnull() &
+      (spgz_characteristics_content_loc_df['Наименование характеристики'].str.len()>0)
+    )
+    # mask = spgz_characteristics_content_loc_df[significant_cols[0]].notnull() & (spgz_characteristics_content_loc_df[significant_cols[0]].str.len()>0)
+    # for col in significant_cols[1:]:
+    #     mask = mask & spgz_characteristics_content_loc_df[col].notnull() & (spgz_characteristics_content_loc_df[col].str.len()>0)
+    spgz_characteristics_content_loc_df = spgz_characteristics_content_loc_df[mask]
+
+    return spgz_code_name, spgz_characteristics_content_loc_df
+
+def extract_spgz_df_lst_v01_02(fn, sh_n_spgz, groupby_col='№п/п',
                         unique_test_cols=['Наименование СПГЗ', 'Единица измерения', 'ОКПД 2', 'Позиция КТРУ'],
                         significant_cols = ['Наименование характеристики', 'Единица измерения характеристики', 'Значение характеристики', 'Тип характеристики', 'Тип выбора значений характеристики заказчиком'],
                         debug=False,
@@ -286,7 +418,11 @@ def extract_spgz_df_lst(fn, sh_n_spgz, groupby_col='№п/п',
       ['Наименование характеристики', 'Единица измерения характеристики', 'Значение характеристики', 'Тип характеристики',
       'Тип выбора значений характеристики заказчиком']
       3. отбор только тех строк, где 'Наименование СПГЗ' и  'Наименование характеристики' не пусты
-      4. првоерка правильности заполнения на листе СПГЗ колонок '№п/п', 'Наименование СПГЗ', 'Единица измерения'
+      4. проверка правильности заполнения на листе СПГЗ колонок '№п/п', 'Наименование СПГЗ', 'Единица измерения'
+
+    v01.03 21.10.2024
+    изменения:
+    'Код характеристики КТРУ'
 
     """
     spgz_header_name_loc_df = pd.read_excel(fn, sheet_name=sh_n_spgz, header=None, nrows=1 )
@@ -385,82 +521,6 @@ def extract_spgz_df_lst(fn, sh_n_spgz, groupby_col='№п/п',
     spgz_characteristics_content_loc_df = spgz_characteristics_content_loc_df[mask]
 
     return spgz_code_name, spgz_characteristics_content_loc_df
-
-def extract_spgz_df_lst_v00(fn, sh_n_spgz, groupby_col='№п/п',
-                        unique_test_cols=['Наименование СПГЗ', 'Единица измерения', 'ОКПД 2', 'Позиция КТРУ']):
-
-    spgz_header_name_loc_df = pd.read_excel(fn, sheet_name=sh_n_spgz, header=None, nrows=1 )
-    # display(kpgz_header_name_loc_df)
-    # print(spgz_header_name_loc_df.values[0,0])
-    spgz_code_name = None
-    try:
-        spgz_code_name = re.sub( 'Перечень позиций СПГЗ, относящихся к позиции КПГЗ ', '', spgz_header_name_loc_df.values[0,0]).strip()
-    except Exception as err:
-        print("ERROR: extract_spgz_df_lst:")
-        print(err)
-
-    spgz_characteristics_content_loc_df = pd.read_excel(fn, sheet_name=sh_n_spgz, header=1) #, skiprows=1
-    spgz_characteristics_content_loc_df = spgz_characteristics_content_loc_df[1:]
-    # display(spgz_characteristics_content_loc_df.head())
-
-    unnamed_cols = [col for col in spgz_characteristics_content_loc_df.columns if col.startswith('Unnamed:')]
-    spgz_characteristics_content_loc_df.drop(columns=unnamed_cols, inplace=True)
-
-    spgz_characteristics_content_loc_df['CГПЗ Код Наименование'] = spgz_code_name
-    # spgz_characteristics_content_loc_df.columns = ['CГПЗ Код Наименование'] + list(spgz_characteristics_content_loc_df.columns[:-1])
-    spgz_characteristics_content_loc_df = spgz_characteristics_content_loc_df[['CГПЗ Код Наименование'] + list(spgz_characteristics_content_loc_df.columns[:-1])]
-
-    for col in unique_test_cols:
-        spgz_characteristics_content_loc_df['Ошибка объединения ячеек\n' + col] = None
-
-    spgz_characteristics_content_loc_df_groupped = spgz_characteristics_content_loc_df.groupby(groupby_col)
-
-    for group_name, group_df in spgz_characteristics_content_loc_df_groupped:
-        # print(group_name)
-        for col in unique_test_cols:
-            # print(group_df[col].unique())
-            if group_df[col].nunique()>1:
-                group_err_str = str(group_df[col].unique().tolist())
-                print(f"'{groupby_col}': '{group_name}'", f"Ошибка группировки (объединения) - в колонке '{col}'")
-                print(group_err_str)
-                # display(spgz_characteristics_content_loc_df[(spgz_characteristics_content_loc_df[groupby_col]==group_name)])
-                spgz_characteristics_content_loc_df.loc[
-                    (spgz_characteristics_content_loc_df[groupby_col]==group_name), 'Ошибка объединения ячеек\n' + col] = group_err_str
-    # display(spgz_characteristics_content_loc_df.head())
-    try:
-        spgz_characteristics_content_loc_df['Наименование характеристики'] = spgz_characteristics_content_loc_df['Наименование характеристики'].apply(trim_right_dot_compress_spaces)
-    except Exception as err:
-        print(err)
-
-    return spgz_code_name, spgz_characteristics_content_loc_df
-
-def pivot_combine_kpgz_spgz_xlsx(fn_lst):
-    kpgz_header_content_df = []
-    kpgz_characteristics_content_df = []
-    spgz_characteristics_content_df = []
-
-    for fn in fn_lst:
-        print(fn)
-        kpgz_code_name, kpgz_header_content_loc_df, kpgz_characteristics_content_loc_df = extract_kpgz_df_lst(fn, sh_n_kpgz)
-        # print("kpgz_code_name:", kpgz_code_name)
-        spgz_code_name, spgz_characteristics_content_loc_df = extract_spgz_df_lst(fn, sh_n_spgz)
-        print("kpgz_code_name:", kpgz_code_name, "spgz_code_name:", spgz_code_name)
-        # col = 'Наименование СПГЗ'
-        # display(spgz_characteristics_content_loc_df[spgz_characteristics_content_loc_df['Ошибка объединения ячеек\n' + col].notnull()])
-        kpgz_header_content_df.append(kpgz_header_content_loc_df)
-        kpgz_characteristics_content_df.append(kpgz_characteristics_content_loc_df)
-        spgz_characteristics_content_df.append(spgz_characteristics_content_loc_df)
-
-        # break
-    kpgz_header_content_df = pd.concat(kpgz_header_content_df)
-    # display(kpgz_header_content_df.head())
-    kpgz_characteristics_content_df = pd.concat(kpgz_characteristics_content_df)
-    # display(kpgz_characteristics_content_df.head())
-    spgz_characteristics_content_df = pd.concat(spgz_characteristics_content_df)
-    # display(spgz_characteristics_content_df.head())
-
-    return kpgz_header_content_df, kpgz_characteristics_content_df, spgz_characteristics_content_df
-
 def get_single_value_chars_of_chars(
     chars_of_chars_dict,
     spgz_df_value_counts,
@@ -603,7 +663,9 @@ def create_kpgz_data(
         'Тип характеристики',
         'Условная операция',
         'Тип выбора значений характеристики заказчиком',
-        'Позиция КТРУ',
+        # 'Позиция КТРУ',
+        # 'Код характеристики КТРУ',
+        'Код КТРУ характеристики',
     ]
     sep_lst = {
         'Единица измерения характеристики': ';\n',
@@ -636,7 +698,8 @@ def create_kpgz_data(
                     # только для одиночных колонок
                     # print(spgz_df[cols].unique()[:5])
         else:
-            print(f"Колонка/колонки '{cols}' отсутствуют в данных")
+            print(f"Колонка/колонки '{cols}' отсутствуют в данных (Заголовок)")
+            print(spgz_df.columns)
     if debug:
         print("kpgz_head:")
         pprint(kpgz_head)
@@ -673,7 +736,8 @@ def create_kpgz_data(
                     value_def_in_spgz = value_def_in_spgz, #'Определено в СПГЗ',
                     debug=False)
         else:
-            logger.error(f"Колонка '{name_char_of_char_col}' отсутствует в данных")
+            logger.error(f"Колонка '{name_char_of_char_col}' отсутствует в данных (Таблица)")
+            print(spgz_df.columns)
             missing_columns.append(name_char_of_char_col)
             for key, value_dict in chars_of_chars_dict.items():
                 chars_of_chars_dict[key][name_char_of_char_col] = default_value_lst.get(name_char_of_char_col)
@@ -687,7 +751,8 @@ def create_kpgz_data(
 
     # chars_of_chars_dict_lst[:5]
     chars_of_chars_df = pd.DataFrame(chars_of_chars_dict_lst)
-    chars_of_chars_df.rename(columns ={'Позиция КТРУ': 'Код характеристики КТРУ'}, inplace=True)
+    chars_of_chars_df.rename(columns ={'Код КТРУ характеристики': 'Код характеристики КТРУ'}, inplace=True)
+
     # chars_of_chars_df.head()
 
     return kpgz_head, chars_of_chars_df
@@ -698,6 +763,11 @@ def get_total_okpd2_code_name(
     debug=False,
 
 ):
+    """
+    v01.02 21.10.2024
+      изменения:
+      если ОКПД-2 все одинаковые, то подгружаем полностью, если ОКПД-2 несколько, то подгружаем только первые 5 символов (до первого отличающегося символа)
+    """
     if debug: print(kpgz_head['ОКПД-2'])
     okpd2_lst = kpgz_head['ОКПД-2']
     if okpd2_lst is not None and (len(okpd2_lst) > 0):
@@ -737,6 +807,12 @@ def get_total_ktru_code_name(
     debug=False,
 
 ):
+    """
+    v01.02 21.10.2024
+         изменения:
+          если ОКПД-2 все одинаковые, то подгружаем полностью, если ОКПД-2 несколько, то подгружаем только первые 5 символов (до первого отличающегося символа)
+
+    """
     if debug: print(kpgz_head[ktru_obj_name])
     ktru_lst = kpgz_head[ktru_obj_name]
     ktru_is_lst = False
@@ -745,24 +821,74 @@ def get_total_ktru_code_name(
         ktru_lst_upd = [ktru_name.replace('\n','').strip() for ktru_name in ktru_lst]
         if '-' in ktru_lst_upd:
             return '-', ktru_is_lst
-        else:
-            return sep.join(ktru_lst_upd), True
+        # else:
+        #     return sep.join(ktru_lst_upd), True
         # ktru_codes_lst = [re.search(r"^[\d\.]+", s).group(0) for s in ktru_lst_upd if re.search(r"^[\d\.]+", s) is not None]
-        # if debug: print(ktru_codes_lst)
-        # set_ktru_codes_lst = set(ktru_codes_lst)
-        # if len(set_ktru_codes_lst)==1:
-        #     ktru_code_prefix = ktru_codes_lst[0]
-        #     if debug: print(ktru_code_prefix)
-        # elif len(set_ktru_codes_lst) > 1:
-        #     ktru_code_prefix = os.path.commonprefix(ktru_codes_lst)
-        #     if debug: print(ktru_code_prefix)
-        # else: # ==0
-        #     return '-', ktru_is_lst
+        ktru_codes_lst = [re.search(r"^[\d\.\-]+", s).group(0) for s in ktru_lst_upd if re.search(r"^[\d\.\-]+", s) is not None]
+        if debug: print(ktru_codes_lst)
+        set_ktru_codes_lst = set(ktru_codes_lst)
+        if debug: print(set_ktru_codes_lst)
+
+        if len(set_ktru_codes_lst)==1:
+            # ktru_code_prefix = ktru_codes_lst[0]
+            ktru_code_prefix = ktru_lst_upd[0]
+            if debug: 
+                print("len(set_ktru_codes_lst)==1")
+                print(ktru_code_prefix)
+                
+            return ktru_code_prefix, ktru_is_lst
+        elif len(set_ktru_codes_lst) > 1:
+            # ktru_code_prefix = os.path.commonprefix(ktru_codes_lst)
+            ktru_code_prefix = os.path.commonprefix(ktru_lst)
+            ktru_is_lst = True
+            if debug: 
+                print("len(set_ktru_codes_lst)>1")
+                print(ktru_code_prefix)
+            return ktru_code_prefix, ktru_is_lst
+        else: # ==0
+            return '-', ktru_is_lst
 
         # ktru_code_prefix = clean_str(ktru_code_prefix)
         # if debug: print(f"ktru_code_prefix: '{ktru_code_prefix}'")
+    else: # ktru_lst is None or (len(ktru_lst) == 0):
+        return '-', ktru_is_lst
 
-        return ktru_lst, ktru_is_lst
+# def get_total_ktru_code_name_v01(
+#     kpgz_head,
+#     ktru_obj_name = 'Позиция КТРУ',
+#     # ktru_df,
+#     sep='|\n',
+#     debug=False,
+
+# ):
+#     if debug: print(kpgz_head[ktru_obj_name])
+#     ktru_lst = kpgz_head[ktru_obj_name]
+#     ktru_is_lst = False
+
+#     if ktru_lst is not None and (len(ktru_lst) > 0):
+#         ktru_lst_upd = [ktru_name.replace('\n','').strip() for ktru_name in ktru_lst]
+#         if '-' in ktru_lst_upd:
+#             return '-', ktru_is_lst
+#         # else:
+#         #     return sep.join(ktru_lst_upd), True
+#         ktru_codes_lst = [re.search(r"^[\d\.]+", s).group(0) for s in ktru_lst_upd if re.search(r"^[\d\.]+", s) is not None]
+#         if debug: print(ktru_codes_lst)
+#         set_ktru_codes_lst = set(ktru_codes_lst)
+#         print(set_ktru_codes_lst)
+#         if len(set_ktru_codes_lst)==1:
+#             ktru_code_prefix = ktru_codes_lst[0]
+#             if debug: print(ktru_code_prefix)
+#         elif len(set_ktru_codes_lst) > 1:
+#             ktru_code_prefix = os.path.commonprefix(ktru_codes_lst)
+#             ktru_is_lst = True
+#             if debug: print(ktru_code_prefix)
+#         else: # ==0
+#             return '-', ktru_is_lst
+
+#         ktru_code_prefix = clean_str(ktru_code_prefix)
+#         if debug: print(f"ktru_code_prefix: '{ktru_code_prefix}'")
+
+#         return ktru_lst, ktru_is_lst
 
 # ktru_lst, ktru_is_lst = get_total_ktru_code_name(
 #     kpgz_head,
@@ -788,8 +914,8 @@ def write_head_kpgz_sheet(
     debug=False
  ):
     column_widths = [40,20,60,20,20,25,25,]
-    ft_bold = Font(bold = True)
-    ft_norm = Font(bold = False)
+    ft_bold = Font(bold = True, name='Times New Roman')
+    ft_norm = Font(bold = False, name='Times New Roman')
     thin_border = Border(left=Side(style='thin'),
                      right=Side(style='thin'),
                      top=Side(style='thin'),
@@ -822,6 +948,7 @@ def write_head_kpgz_sheet(
     ws['B2'] = 'Утверждена'
     ws['A2'].border = thin_border
     ws['B2'].border = thin_border
+    ws['B2'].font = ft_norm
 
     ws['A3'] = 'ОКПД-2'
     ws['A3'].font = ft_bold
@@ -832,11 +959,13 @@ def write_head_kpgz_sheet(
                 debug=False)
     ws['A3'].border = thin_border
     ws['B3'].border = thin_border
+    ws['B3'].font = ft_norm
 
     ws['A4'] = 'Позиция КТРУ'
     ws['A4'].font = ft_bold
     ws['A4'].border = thin_border
     ws['B4'].border = thin_border
+    ws['B4'].font = ft_norm
 
     ktru_lst, ktru_is_lst = get_total_ktru_code_name(kpgz_head)
     ws['B4'] = ktru_lst
@@ -848,24 +977,29 @@ def write_head_kpgz_sheet(
     ws['B5'] = '-'
     ws['A5'].border = thin_border
     ws['B5'].border = thin_border
+    ws['B5'].font = ft_norm
 
     ws['A6'] = 'Загружено из ЕМИАС'
     ws['A6'].font = ft_bold
     ws['B6'] = 'Нет'
     ws['A6'].border = thin_border
     ws['B6'].border = thin_border
+    ws['B6'].font = ft_norm
 
     ws['A7'] = 'Характеристики (кол-во)'
     ws['A7'].font = ft_bold
     ws['B7'] = str(kpgz_head['Характеристики (кол-во)'])
     ws['A7'].border = thin_border
     ws['B7'].border = thin_border
+    ws['B7'].font = ft_norm
 
     ws['A8'] = 'СПГЗ (кол-во)'
     ws['A8'].font = ft_bold
-    ws['B8'] = f"{kpgz_head['СПГЗ (кол-во)']} (СПГЗ/ИНП (кол-во) {kpgz_head['СПГЗ/ИНП (кол-во)']})"
+    # ws['B8'] = f"{kpgz_head['СПГЗ (кол-во)']} (СПГЗ/ИНП (кол-во) {kpgz_head['СПГЗ/ИНП (кол-во)']})"
+    ws['B8'] = f"{kpgz_head['СПГЗ/ИНП (кол-во)']}"
     ws['A8'].border = thin_border
     ws['B8'].border = thin_border
+    ws['B8'].font = ft_norm
 
 
     ws['A10'] = 'Справочник характеристик и их значений позиции КПГЗ ' + spgz_code_name
@@ -897,10 +1031,13 @@ def write_head_kpgz_sheet(
             ws[get_column_letter(i) + f"{i_row}"].alignment = Alignment(wrap_text=True,vertical='top')
             # if i < (len(column_widths)+2):
             ws[get_column_letter(i) + f"{i_row}"].border = thin_border
+            ws[get_column_letter(i) + f"{i_row}"].font = ft_norm
         i_row += 1
 
     for i, column_width in enumerate(column_widths,1):  # ,1 to start at 1
+    # for i, column_width in enumerate(column_widths-1,1):  # ,1 to start at 1
         ws.column_dimensions[get_column_letter(i)].width = column_width
+        ws.column_dimensions[get_column_letter(i)].font = Font(name='Times New Roman')
         # ws.column.alignment = Alignment(wrap_text=True,vertical='top')
         # ws.column_dimensions[get_column_letter(i)].alignment = Alignment(wrap_text=True,vertical='top')
 
@@ -1026,7 +1163,13 @@ def main_02(
           groupby_col='№п/п',
           unique_test_cols=['Наименование СПГЗ', 'Единица измерения', 'ОКПД 2', 'Позиция КТРУ'],
           significant_cols = [
-              'Наименование характеристики', 'Единица измерения характеристики', 'Значение характеристики', 'Тип характеристики', 'Тип выбора значений характеристики заказчиком'],
+              'Наименование характеристики', 'Единица измерения характеристики', 'Значение характеристики', 
+              'Тип характеристики', 
+              'Тип выбора значений характеристики заказчиком',
+              'Условная операция',
+              'Код КТРУ характеристики', # 'Код характеристики КТРУ',
+
+              ],
         )
         if debug: print(spgz_code_name)
         kpgz_head, chars_of_chars_df = create_kpgz_data(spgz_characteristics_content_loc_df, debug = False)
